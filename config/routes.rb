@@ -37,11 +37,14 @@ ActionController::Routing::Routes.draw do |map|
 
   map.root :controller => 'root'
 
-  map.resources :tasks, :path_prefix => 'api'
+  map.resource :api, :controller => 'api', :only => [:show]
+
+  map.resources :tasks, :path_prefix => 'api', :except => [:update, :edit, :new, :create]
+  map.resources :images, :path_prefix => 'api', :except => [:update, :edit, :new], :member => { :download => :get }
 
   # Install the default routes as the lowest priority.
   # Note: These default routes make all actions in every controller accessible via GET requests. You should
   # consider removing or commenting them out if you're using named routes and resources.
-  map.connect ':controller/:action/:id'
-  map.connect ':controller/:action/:id.:format'
+  #map.connect ':controller/:action/:id'
+  #map.connect ':controller/:action/:id.:format'
 end

@@ -1,7 +1,7 @@
-<% if task_actions.size > 0 %>
+<% if image_actions.size > 0 %>
     <p>Available actions:</p>
     <ul>
-      <% for action in task_actions do %>
+      <% for action in image_actions do %>
           <li><%= action %></li>
       <% end %>
     </ul>
@@ -9,12 +9,12 @@
     <p>No actions available.</p>
 <% end %>
 
-<% if @tasks.size > 0 %>
-    Tasks:
+<% if @images.size > 0 %>
+    Images:
     <ul>
-      <% for task in @tasks %>
+      <% for image in @images %>
           <li>
-            <pre><%= task.attributes.to_yaml %></pre>
+            <pre><%= image.attributes.to_yaml %></pre>
           </li>
       <% end %>
     </ul>

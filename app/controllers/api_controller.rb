@@ -1,8 +1,9 @@
 class ApiController < ApplicationController
 
-  def index
+  def show
     @entry_points = [
-            [ :tasks, tasks_url ]
+            [ :tasks, tasks_url ],
+            [ :images, images_url ]
     ]
   end
 
