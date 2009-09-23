@@ -1,3 +1,4 @@
 class BaseController < ApplicationController
-  include UrlHelper 
+  include UrlHelper
+  include ConversionHelper
 end

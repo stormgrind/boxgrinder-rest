@@ -1,6 +1,6 @@
 class ImagesController < BaseController
 
-  include ConversionHelper
+  include ImagesHelper
 
   layout 'actions' #, :only => :index
 
@@ -53,7 +53,14 @@ class ImagesController < BaseController
 
     @task = Task.new
     @task.description = "Building image with id == #{@image.id}."
-    @task.status = "NEW"
+
+    if is_built?
+      # if image was built before, create a temp task with completed status
+      @task.status = "COMPLETED"
+    else
+      @task.status = "NEW"
+    end
+
     @task.save!
 
     respond_to do |format|
