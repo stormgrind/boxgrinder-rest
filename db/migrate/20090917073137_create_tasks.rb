@@ -3,6 +3,7 @@ class CreateTasks < ActiveRecord::Migration
     create_table :tasks do |t|
       t.string :description
       t.string :status
+      t.integer :image_id
       t.timestamps
     end
   end

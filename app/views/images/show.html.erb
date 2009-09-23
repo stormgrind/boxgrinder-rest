@@ -29,7 +29,7 @@
 </table>
 
 
-<% unless is_packaged? %>
+<% unless is_packaged? or is_in_progress? %>
     <h4>Available actions</h4>
     <ul>
       <% unless is_built? %>

@@ -7,6 +7,11 @@
     </td>
   </tr>
   <tr class="row">
+    <td>Image ID</td>
+    <td><%= link_to @task.image_id, :controller => "images", :action => :show, :id => @task.image_id %>
+    </td>
+  </tr>
+  <tr class="row">
     <td>Status</td>
     <td><%= @task.status %>
     </td>
