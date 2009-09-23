@@ -2,7 +2,7 @@ class CreateImages < ActiveRecord::Migration
   def self.up
     create_table :images do |t|
       t.string :description
-
+      t.string :status
       t.timestamps
     end
   end

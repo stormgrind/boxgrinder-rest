@@ -5,19 +5,19 @@ module ApplicationHelper
     url = request.path.split('?')  #remove extra query string parameters
     levels = url[0].split('/') #break up url into different levels
     levels.each_with_index do |level, index|
-      unless level.blank?
+      unless level.blank? or index > 2
         #if
-          #(level == levels[levels.size-2] && levels[levels.size-1].to_i > 0)
-         # s += "<li class='subsequent'>#{level.gsub(/_/, ' ')}</li>\n" # unless level.to_i > 0
+        #(level == levels[levels.size-2] && levels[levels.size-1].to_i > 0)
+        # s += "<li class='subsequent'>#{level.gsub(/_/, ' ')}</li>\n" # unless level.to_i > 0
         #else
-          link = "/"
-          i = 1
-          while i <= index
-            link += "#{levels[i]}/"
-            i+=1
-          end
-          s += "<li class='subsequent'><a href=\"#{link.gsub(/\/$/, '')}\">#{level.gsub(/_/, ' ')}</a></li>\n"
-       # end
+        link = "/"
+        i = 1
+        while i <= index
+          link += "#{levels[i]}/"
+          i+=1
+        end
+        s += "<li class='subsequent'><a href=\"#{link.gsub(/\/$/, '')}\">#{level.gsub(/_/, ' ')}</a></li>\n"
+        # end
       end
     end
     s+="</ul>"

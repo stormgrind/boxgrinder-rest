@@ -40,6 +40,28 @@ class ImagesController < BaseController
 
   # build an image
   def build
+    begin
+      @image = Image.find(params[:id])
+    rescue ActiveRecord::RecordNotFound => e
+      respond_to do |format|
+        format.html { render :text=> 'Image not found', :status=>404 }
+        format.yaml { render :text => convert_to_yaml( @image ), :content_type => Mime::TEXT }
+        format.json { render :json => @image }
+        format.xml { render :xml => @image }
+      end
+    end
+
+    @task = Task.new
+    @task.description = "Building image with id == #{@image.id}."
+    @task.status = "NEW"
+    @task.save!
+
+    respond_to do |format|
+      format.html
+      format.yaml { render :text => convert_to_yaml( @task ), :content_type => Mime::TEXT }
+      format.json { render :json => @task }
+      format.xml { render :xml => @task }
+    end
 
   end
 

@@ -7,6 +7,11 @@
     </td>
   </tr>
   <tr class="row">
+    <td>Status</td>
+    <td><%= @image.status %>
+    </td>
+  </tr>
+  <tr class="row">
     <td>Description</td>
     <td><%= @image.description %>
     </td>
@@ -22,3 +27,15 @@
     </td>
   </tr>
 </table>
+
+
+<% unless is_packaged? %>
+    <h4>Available actions</h4>
+    <ul>
+      <% unless is_built? %>
+          <li><%= link_to "Build", :action => :build %></li>
+      <% end %>
+
+      <li><%= link_to "Package", :action => :package %> </li>
+    </ul>
+<% end %>

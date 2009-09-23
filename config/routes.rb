@@ -42,7 +42,8 @@ ActionController::Routing::Routes.draw do |map|
   map.connect 'tasks/status/:status.:format', :path_prefix => 'api', :controller => 'tasks', :action => 'index', :conditions => { :method => :get }
 
   map.resources :tasks, :path_prefix => 'api', :except => [:update, :edit, :new, :create]
-  map.resources :images, :path_prefix => 'api', :except => [:update, :edit, :new], :member => { :download => :get }, :members => {:downloada => :show }
+   
+  map.resources :images, :path_prefix => 'api', :except => [:update, :edit, :new], :member => { :package => :get, :build => :get }
 
 
   # Install the default routes as the lowest priority.
