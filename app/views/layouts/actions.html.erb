@@ -1,17 +1,16 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<h3>Output formats</h3>
 
-<html>
-<head>
-  <title>Grape API</title>
-</head>
-<body>
+Every API call return data in various output formats. To select a output format provide its name after dot, eg.
+<code>.yaml</code>.
 
-<p><%= api_name %> API v<%= api_version %></p>
+<h4>Available output formats:</h4>
 
-<p><%= bread_crumb -%></p>
+<ul>
+  <li><code>.yaml</code> or HTTP Header: <code>Accept: text/yaml</code></li>
+  <li><code>.xml</code> or HTTP Header: <code>Accept: text/xml</code></li>
+  <li><code>.json</code> or HTTP Header: <code>Accept: application/json</code></li>
+</ul>
 
 <%= yield %>
 
-</body>
-</html>
+<% parent_layout 'application' %> 

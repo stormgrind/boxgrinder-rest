@@ -3,15 +3,22 @@
 
 <html>
 <head>
-  <title>Grape API</title>
+  <title><%= api_name %> API v<%= api_version %></title>
+  <%= stylesheet_link_tag 'main.css' %>
 </head>
 <body>
 
-<p><%= api_name %> API v<%= api_version %></p>
+<div id="main">
+  <div id="header">
+    <h2><%= api_name %> API v<%= api_version %></h2>
 
-<p><%= bread_crumb -%></p>
+    <p><%= bread_crumb -%></p>
+  </div>
 
-<%= yield %>
+  <%= yield %>
+
+</div>
+
 
 </body>
 </html>

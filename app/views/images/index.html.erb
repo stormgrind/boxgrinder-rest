@@ -1,21 +1,13 @@
-<% if image_actions.size > 0 %>
-    <p>Available actions:</p>
-    <ul>
-      <% for action in image_actions do %>
-          <li><%= action %></li>
-      <% end %>
-    </ul>
-<% else %>
-    <p>No actions available.</p>
-<% end %>
+<h3>Images</h3>
 
 <% if @images.size > 0 %>
-    Images:
-    <ul>
+    <table cellspacing="1" cellpadding="5">
       <% for image in @images %>
-          <li>
-            <pre><%= image.attributes.to_yaml %></pre>
-          </li>
+          <tr class="row">
+            <td>
+              <%= link_to "#{image.id}", image %></td>
+            <td><%= image.description %></td>
+          </tr>
       <% end %>
-    </ul>
+    </table>
 <% end %>

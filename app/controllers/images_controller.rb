@@ -1,8 +1,8 @@
-class ImagesController < ApplicationController
+class ImagesController < BaseController
 
   include ConversionHelper
 
-  layout 'actions', :only => :index
+  layout 'actions' #, :only => :index
 
   # shows information in HTML format
   def index
@@ -19,7 +19,18 @@ class ImagesController < ApplicationController
 
   # shows selected image
   def show
+    begin
+      @image = Image.find(params[:id])
+    rescue ActiveRecord::RecordNotFound => e
+      logger.info "Image with id == '#{params[:id]}' not found!", e
+    end
 
+    respond_to do |format|
+      format.html
+      format.yaml { render :text => convert_to_yaml( @image ), :content_type => Mime::TEXT }
+      format.json { render :json => @image }
+      format.xml { render :xml => @image }
+    end
   end
 
   # packages selected image

@@ -1,14 +1,17 @@
-class TasksController < ApplicationController
+class TasksController < BaseController
 
   include ConversionHelper
 
-  layout 'actions', :only => :index
-  helper_method :convert_tasks_to_yaml  
+  layout 'actions' #, :only => :index, :show
+  #helper_method :convert_tasks_to_yaml
 
   # shows information in HTML format
   def index
-    # TODO this is not great
-    @tasks = Task.all
+    unless params[:status].nil?
+      @tasks = Task.all(:conditions => { 'status' => params[:status].upcase } )
+    else
+      @tasks = Task.all
+    end
 
     respond_to do |format|
       format.html
