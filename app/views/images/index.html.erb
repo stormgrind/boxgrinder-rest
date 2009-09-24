@@ -2,6 +2,11 @@
 
 <% if @images.size > 0 %>
     <table cellspacing="1" cellpadding="5">
+      <tr class="header">
+        <th>ID</th>
+        <th>Image status</th>
+        <th>Image description</th>
+      </tr>
       <% for image in @images %>
           <tr class="row">
             <td>

@@ -2,6 +2,12 @@
 
 <% if @tasks.size > 0 %>
     <table cellspacing="1" cellpadding="5">
+      <tr class="header">
+        <th>ID</th>
+        <th>Task status</th>
+        <th>Action on image</th>
+        <th>Task description</th>
+      </tr>
       <% for task in @tasks %>
           <tr class="row">
             <td>

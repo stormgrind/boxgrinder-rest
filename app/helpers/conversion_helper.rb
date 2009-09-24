@@ -1,5 +1,4 @@
 module ConversionHelper
-
   def convert_to_yaml( o )
     if o.class.eql?(Array)
       a = []
@@ -8,7 +7,7 @@ module ConversionHelper
       end
       a.to_yaml
     else
-      o.attributes.to_yaml
+      o.class.ancestors.include?(ActiveRecord::Base) ? o.attributes.to_yaml : o.to_yaml
     end
   end
 end

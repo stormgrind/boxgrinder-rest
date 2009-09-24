@@ -37,3 +37,8 @@ p {
 tr.row {
     background-color: #ddd;
 }
+
+tr.header {
+    background-color: #888;
+    color: #fff;
+}

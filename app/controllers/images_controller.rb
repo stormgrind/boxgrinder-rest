@@ -6,8 +6,11 @@ class ImagesController < BaseController
 
   # shows information in HTML format
   def index
-    # TODO this is not great
-    @images = Image.all
+    unless params[:status].nil?
+      @images = Image.all(:conditions => { 'status' => params[:status].upcase } )
+    else
+      @images = Image.all
+    end
 
     respond_to do |format|
       format.html
@@ -19,7 +22,7 @@ class ImagesController < BaseController
 
   # shows selected image
   def show
-    return unless load_image
+    return unless image_loaded?
 
     respond_to do |format|
       format.html
@@ -31,25 +34,25 @@ class ImagesController < BaseController
 
   # packages selected image
   def package
-    return unless load_image
+    return unless image_loaded? and image_valid?
 
-    archive_type = (params[:type].nil? or PACKAGE_FORMAT.include?( params[:type] )) ? :zip : params[:type]
+    @task = Task.last(:conditions => "image_id = '#{@image.id}'")
 
-    puts archive_type
+    if is_built? and @task.nil? or @task.action.eql?( IMAGE_ACTIONS[:build] )
+      archive_type = (params[:type].nil? or PACKAGE_FORMAT.include?( params[:type] )) ? :zip : params[:type]
 
-    unless is_built?
-      @task = Task.last(:conditions => "image_id = '#{@image.id}'")
-    else
       @task = Task.new
       @task.description = "Packaging image with id == #{@image.id}."
       @task.image_id = @image.id
       @task.created_at = @task.updated_at = Time.now
+      @task.action = IMAGE_ACTIONS[:package]
+      @task.params = [ archive_type ]
       @task.status = "NEW"
       @task.save!
     end
 
     respond_to do |format|
-      format.html { render :action => 'task' }
+      format.html { render 'tasks/show' }
       format.yaml { render :text => convert_to_yaml( @task ), :content_type => Mime::TEXT }
       format.json { render :json => @task }
       format.xml { render :xml => @task }
@@ -57,8 +60,8 @@ class ImagesController < BaseController
   end
 
   # build an image
-  def task
-    return unless load_image
+  def build
+    return unless image_loaded? and image_valid?
 
     unless is_new?
       @task = Task.last(:conditions => "image_id = '#{@image.id}'")
@@ -72,7 +75,7 @@ class ImagesController < BaseController
     end
 
     respond_to do |format|
-      format.html  { render :action => 'task' }
+      format.html  { render 'tasks/show' }
       format.yaml { render :text => convert_to_yaml( @task ), :content_type => Mime::TEXT }
       format.json { render :json => @task }
       format.xml { render :xml => @task }
@@ -81,7 +84,7 @@ class ImagesController < BaseController
 
 # prepares an image to download
   def download
-    return unless load_image
+    return unless image_loaded?
 
     unless is_packaged?
       respond_to do |format|
@@ -97,7 +100,22 @@ class ImagesController < BaseController
 
   private
 
-  def load_image
+  def image_valid?
+    return true unless is_invalid?
+
+    @error = Error.new
+    @error.message = "Image is invalid"
+
+    respond_to do |format|
+      format.html { render 'root/error'}
+      format.yaml { render :text => convert_to_yaml( @error ), :content_type => Mime::TEXT }
+      format.json { render :json => @error }
+      format.xml { render :xml => @error }
+    end
+    false
+  end
+
+  def image_loaded?
     begin
       @image = Image.find(params[:id])
       return true
@@ -109,8 +127,7 @@ class ImagesController < BaseController
         #format.json { render :json => @image }
         #format.xml { render :xml => @image }
       end
-      return false
     end
+    false
   end
-
 end

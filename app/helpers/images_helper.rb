@@ -1,6 +1,5 @@
 module ImagesHelper
-
-  include Defaults
+  include BaseHelper
 
   def is_in_progress?
     return true if @image.status.nil?
@@ -27,7 +26,7 @@ module ImagesHelper
     @image.status.eql?( IMAGE_STATUS[:new] )
   end
 
-   def is_invalid?
+  def is_invalid?
     return true if @image.status.nil?
     @image.status.eql?( IMAGE_STATUS[:invalid] )
   end

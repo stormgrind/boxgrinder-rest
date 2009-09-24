@@ -1,11 +1,10 @@
 class TasksController < BaseController
 
-  include ConversionHelper
+  include TasksHelper
 
-  layout 'actions' #, :only => :index, :show
-  #helper_method :convert_tasks_to_yaml
+  layout 'actions'
 
-  # shows information in HTML format
+  # shows all tasks
   def index
     unless params[:status].nil?
       @tasks = Task.all(:conditions => { 'status' => params[:status].upcase } )
@@ -13,26 +12,45 @@ class TasksController < BaseController
       @tasks = Task.all
     end
 
-    respond_to do |format|
-      format.html
-      format.yaml { render :text =>  convert_to_yaml( @tasks ), :content_type => Mime::TEXT }
-      format.json { render :json => @tasks }
-      format.xml { render :xml => @tasks }
-    end
+    render_task( @tasks, 'tasks/index')
   end
 
   def show
+    load_task
+
+    render_task( @task )
+  end
+
+  def abort
+    load_task
+
+    # 
+    @task.status = TASK_STATUS[:aborted]
+
+    puts is?( :aborted )
+
+    render_task( @task )
+  end
+
+  private
+
+  def load_task
     begin
       @task = Task.find(params[:id])
+      return true
     rescue ActiveRecord::RecordNotFound => e
       logger.info "Task with id == '#{params[:id]}' not found!", e
     end
+    false
+  end
 
+  def render_task( o, html_template = 'tasks/show' )
     respond_to do |format|
-      format.html
-      format.yaml { render :text => convert_to_yaml( @task ), :content_type => Mime::TEXT }
-      format.json { render :json => @task }
-      format.xml { render :xml => @task }
+      format.html { render html_template }
+      format.yaml { render :text => convert_to_yaml( o ), :content_type => Mime::TEXT }
+      format.json { render :json => o }
+      format.xml { render :xml => o }
     end
   end
+
 end

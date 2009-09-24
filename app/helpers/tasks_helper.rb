@@ -1,9 +1,8 @@
 module TasksHelper
-  def task_actions
-    a = []
-    for method in TasksController.instance_methods(false)
-      a.push method unless method.eql?('index')
-    end
-    a.sort
+  include BaseHelper
+
+  def is?( status )
+    return false if @task.status.nil?
+    @task.status.eql?( TASK_STATUS[status] )
   end
 end
