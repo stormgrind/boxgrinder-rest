@@ -42,3 +42,12 @@
     </td>
   </tr>
 </table>
+
+<% unless is?(:aborted) %>
+    <h4>Available actions</h4>
+    <ul>
+
+      <li><%= link_to "Abort", :action => :abort %></li>
+
+    </ul>
+<% end %>

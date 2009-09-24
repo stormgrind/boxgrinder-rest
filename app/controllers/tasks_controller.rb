@@ -24,10 +24,10 @@ class TasksController < BaseController
   def abort
     load_task
 
-    # 
+    #TODO add here some meat
+    
     @task.status = TASK_STATUS[:aborted]
-
-    puts is?( :aborted )
+    @task.save!
 
     render_task( @task )
   end
