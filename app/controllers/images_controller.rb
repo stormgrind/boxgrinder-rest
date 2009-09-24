@@ -19,11 +19,7 @@ class ImagesController < BaseController
 
   # shows selected image
   def show
-    begin
-      @image = Image.find(params[:id])
-    rescue ActiveRecord::RecordNotFound => e
-      logger.info "Image with id == '#{params[:id]}' not found!", e
-    end
+    return unless load_image
 
     respond_to do |format|
       format.html
@@ -35,45 +31,86 @@ class ImagesController < BaseController
 
   # packages selected image
   def package
+    return unless load_image
 
-  end
+    archive_type = (params[:type].nil? or PACKAGE_FORMAT.include?( params[:type] )) ? :zip : params[:type]
 
-  # build an image
-  def build
-    begin
-      @image = Image.find(params[:id])
-    rescue ActiveRecord::RecordNotFound => e
-      respond_to do |format|
-        format.html { render :text=> 'Image not found', :status=>404 }
-        format.yaml { render :text => convert_to_yaml( @image ), :content_type => Mime::TEXT }
-        format.json { render :json => @image }
-        format.xml { render :xml => @image }
-      end
-    end
+    puts archive_type
 
-    @task = Task.new
-    @task.description = "Building image with id == #{@image.id}."
-
-    if is_built?
-      # if image was built before, create a temp task with completed status
-      @task.status = "COMPLETED"
+    unless is_built?
+      @task = Task.last(:conditions => "image_id = '#{@image.id}'")
     else
+      @task = Task.new
+      @task.description = "Packaging image with id == #{@image.id}."
+      @task.image_id = @image.id
+      @task.created_at = @task.updated_at = Time.now
       @task.status = "NEW"
+      @task.save!
     end
-
-    @task.save!
 
     respond_to do |format|
-      format.html
+      format.html { render :action => 'task' }
       format.yaml { render :text => convert_to_yaml( @task ), :content_type => Mime::TEXT }
       format.json { render :json => @task }
       format.xml { render :xml => @task }
     end
-
   end
 
-  # prepares an image to download
+  # build an image
+  def task
+    return unless load_image
+
+    unless is_new?
+      @task = Task.last(:conditions => "image_id = '#{@image.id}'")
+    else
+      @task = Task.new
+      @task.description = "Building image with id == #{@image.id}."
+      @task.image_id = @image.id
+      @task.created_at = @task.updated_at = Time.now
+      @task.status = "NEW"
+      @task.save!
+    end
+
+    respond_to do |format|
+      format.html  { render :action => 'task' }
+      format.yaml { render :text => convert_to_yaml( @task ), :content_type => Mime::TEXT }
+      format.json { render :json => @task }
+      format.xml { render :xml => @task }
+    end
+  end
+
+# prepares an image to download
   def download
+    return unless load_image
 
+    unless is_packaged?
+      respond_to do |format|
+        format.html { render :text => "Package first!" }
+      end
+      return
+    end
+
+    respond_to do |format|
+      format.html { render :text=> 'Downloading...' }
+    end
   end
+
+  private
+
+  def load_image
+    begin
+      @image = Image.find(params[:id])
+      return true
+    rescue ActiveRecord::RecordNotFound => e
+      respond_to do |format|
+        format.html { render :text=> 'Image not found', :status=>404 }
+
+        #format.yaml { render :text => convert_to_yaml( @image ), :content_type => Mime::TEXT }
+        #format.json { render :json => @image }
+        #format.xml { render :xml => @image }
+      end
+      return false
+    end
+  end
+
 end

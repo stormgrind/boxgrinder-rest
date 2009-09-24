@@ -28,14 +28,17 @@
   </tr>
 </table>
 
-
-<% unless is_packaged? or is_in_progress? %>
+<% unless is_in_progress? %>
     <h4>Available actions</h4>
     <ul>
-      <% unless is_built? %>
-          <li><%= link_to "Build", :action => :build %></li>
-      <% end %>
+      <% unless is_packaged? %>
+          <% unless is_built? %>
+              <li><%= link_to "Build", :action => :build %></li>
+          <% end %>
 
-      <li><%= link_to "Package", :action => :package %> </li>
+          <li><%= link_to "Package", :action => :package %> </li>
+      <% else %>
+          <li><%= link_to "Download", :action => :download %> </li>
+      <% end %>
     </ul>
 <% end %>
