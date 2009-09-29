@@ -5,7 +5,8 @@ class CreateTasks < ActiveRecord::Migration
       t.string :status
       t.string :action
       t.string :params
-      t.integer :image_id
+      t.string :artifact
+      t.integer :artifact_id
       t.timestamps
     end
   end

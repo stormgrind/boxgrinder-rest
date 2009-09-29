@@ -1,3 +1,11 @@
 <h3>An error occured</h3>
 
+<h4>Message</h4>
+
 <p><strong><%= @error.message %></strong></p>
+
+<% unless @error.exception.nil? %>
+    <h4>Exception</h4>
+
+    <pre><%= @error.exception %></pre>
+<% end %>

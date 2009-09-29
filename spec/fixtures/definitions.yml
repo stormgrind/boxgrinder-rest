@@ -1,0 +1,9 @@
+one:
+  id: 1
+  status: CREATED
+  description: "This is a description of a definition"
+
+two:
+  id: 2
+  status: ERROR
+  description: "This is a description of a definition"

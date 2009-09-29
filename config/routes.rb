@@ -39,15 +39,23 @@ ActionController::Routing::Routes.draw do |map|
 
   map.resource :api, :controller => 'api', :only => [:show]
 
-  map.connect 'tasks/status/:status.:format', :path_prefix => 'api', :controller => 'tasks', :action => 'index', :conditions => { :method => :get }
+  #map.connect 'tasks/status/:status.:format', :path_prefix => 'api', :controller => 'tasks', :action => 'index', :conditions => { :method => :get }, :requirements => { :id => /\d+/ }
 
-  map.resources :tasks, :path_prefix => 'api', :except => [:update, :edit, :new, :create], :member => { :abort => :get }
+  map.resources :tasks, :path_prefix => 'api', :except => [:update, :edit, :new, :create], :member => { :abort => :post }, :requirements => { :id => /\d+/ }
+  map.resources :images, :path_prefix => 'api', :except => [:update, :edit, :new], :member => { :convert => :post }, :requirements => { :id => /\d+/ }
+  map.resources :definitions, :path_prefix => 'api', :except => [:update, :edit, :new], :requirements => { :id => /\d+/ }
+  map.resources :packages, :path_prefix => 'api', :except => [:update, :edit, :new], :requirements => { :id => /\d+/ }
 
-  map.resources :images, :path_prefix => 'api', :except => [:update, :edit, :new], :member => { :package => :get, :build => :get, :download => :get }
 
-  map.connect 'images/status/:status.:format', :path_prefix => 'api', :controller => 'images', :action => 'index', :conditions => { :method => :get }
-  map.connect 'images/:id/package/:type.:format', :path_prefix => 'api', :controller => 'images', :action => 'package', :conditions => { :method => :get }
+  #map.connect 'images/:id/package/:image_type/:archive_type.:format', :path_prefix => 'api', :controller => 'images', :action => 'package', :conditions => { :method => :post }, :requirements => { :id => /\d+/ }
 
+
+  #map.connect 'images/:action/:image_id', :controller => 'images'
+
+  #map.connect 'images/:id', :path_prefix => 'api', :controller => 'definitions', :action => 'show', :requirements => { :id => /\d/ }  
+
+  # requirements
+  #map.connect 'definitions/:id', :path_prefix => 'api', :controller => 'definitions', :action => 'show', :requirements => { :id => /\d/ }
 
   # Install the default routes as the lowest priority.
   # Note: These default routes make all actions in every controller accessible via GET requests. You should

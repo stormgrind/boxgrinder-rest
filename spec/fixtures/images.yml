@@ -1,0 +1,14 @@
+one:
+  id: 1
+  description: "This is a description of an image"
+  status: BUILDING
+
+two:
+  id: 2
+  description: "This is a description of an image"
+  status: CREATED
+
+three:
+  id: 3
+  description: "This is a description of an image"
+  status: ERROR

@@ -1,0 +1,9 @@
+one:
+  artifact: DEFINITION
+  created_at: 2009-09-28 07:50:52
+  updated_at: 2009-09-28 07:50:52
+  action: CREATE
+  id: "1"
+  description: Creating new definition.
+  params: TODO
+  status: NEW

@@ -1,4 +1,6 @@
 module ConversionHelper
+  private
+
   def convert_to_yaml( o )
     if o.class.eql?(Array)
       a = []

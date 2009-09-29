@@ -5,16 +5,16 @@
       <tr class="header">
         <th>ID</th>
         <th>Task status</th>
-        <th>Action on image</th>
-        <th>Task description</th>
+        <th>Artifact</th>
+        <th>Action</th>
       </tr>
       <% for task in @tasks %>
           <tr class="row">
             <td>
               <%= link_to "#{task.id}", task %></td>
             <td><%= task.status %></td>
+            <td><%= task.artifact %></td>
             <td><%= task.action %></td>
-            <td><%= task.description %></td>
           </tr>
       <% end %>
     </table>

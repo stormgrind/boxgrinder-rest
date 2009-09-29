@@ -7,13 +7,18 @@
     </td>
   </tr>
   <tr class="row">
-    <td>Image ID</td>
-    <td><%= link_to @task.image_id, :controller => "images", :action => :show, :id => @task.image_id %>
+    <td>Status</td>
+    <td><%= @task.status %>
     </td>
   </tr>
   <tr class="row">
-    <td>Status</td>
-    <td><%= @task.status %>
+    <td>Artifact</td>
+    <td><%= @task.artifact %> 
+    </td>
+  </tr>
+  <tr class="row">
+    <td>Artifact id</td>
+    <td><%= @task.artifact_id %>
     </td>
   </tr>
   <tr class="row">
@@ -23,7 +28,7 @@
   </tr>
   <tr class="row">
     <td>Action parameters</td>
-    <td><%= @task.params %>
+    <td><%= Base64.decode64(@task.params) unless @task.params.nil? %>
     </td>
   </tr>
   <tr class="row">
@@ -43,11 +48,11 @@
   </tr>
 </table>
 
-<% unless is?(:aborted) %>
+<% unless is_task_status?( :aborted ) or is_task_status?( :completed ) %>
     <h4>Available actions</h4>
     <ul>
 
-      <li><%= link_to "Abort", :action => :abort %></li>
+      <li><%= link_to "Abort", :action => :abort, :controller => :tasks, :id => @task.id %></li>
 
     </ul>
 <% end %>

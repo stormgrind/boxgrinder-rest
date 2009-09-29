@@ -1,0 +1,21 @@
+<h3>Packages</h3>
+
+<% if @packages.size > 0 %>
+    <table cellspacing="1" cellpadding="5">
+      <tr class="header">
+        <th>ID</th>
+        <th>Package status</th>
+        <th>Package description</th>
+      </tr>
+      <% for package in @packages %>
+          <tr class="row">
+            <td>
+              <%= link_to "#{package.id}", package %></td>
+            <td><%= package.status %></td>
+            <td><%= package.description %></td>
+          </tr>
+      <% end %>
+    </table>
+<% else %>
+    <p>No packages found.</p>
+<% end %>

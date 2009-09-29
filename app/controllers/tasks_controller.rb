@@ -25,7 +25,6 @@ class TasksController < BaseController
     load_task
 
     #TODO add here some meat
-    
     @task.status = TASK_STATUS[:aborted]
     @task.save!
 
