@@ -14,10 +14,8 @@ class DefinitionsController < ApplicationController
   end
 
   def create
-    @task = Task.new
-    @task.description = "Creating new definition."
-    @task.artifact = ARTIFACTS[:definition]
-    @task.action = DEFINITION_ACTIONS[:create]
+    @task = Task.new( :artifact => ARTIFACTS[:definition], :action => DEFINITION_ACTIONS[:create], :description => "Creating new definition." )
+
     # TODO add param with information about definition file
     @task.params = 'TODO'
     @task.save!
@@ -28,12 +26,7 @@ class DefinitionsController < ApplicationController
   def destroy
     return unless definition_loaded?
 
-    @task = Task.new
-    @task.description = "Destroying definition with id == #{@definition.id}."
-    @task.artifact = ARTIFACTS[:definition]
-    @task.artifact_id = @definition.id 
-    @task.action = DEFINITION_ACTIONS[:destroy]
-    @task.status = TASK_STATUSES[:new]
+    @task = Task.new( :artifact => ARTIFACTS[:definition], :action => DEFINITION_ACTIONS[:destroy], :artifact_id => @definition.id, :description => "Destroying definition with id == #{@definition.id}." )
     @task.save!
 
     render_task

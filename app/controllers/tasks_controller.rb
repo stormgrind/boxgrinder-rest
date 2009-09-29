@@ -1,5 +1,4 @@
 class TasksController < BaseController
-
   include TasksHelper
 
   layout 'actions'
@@ -12,44 +11,24 @@ class TasksController < BaseController
       @tasks = Task.all
     end
 
-    render_task( @tasks, 'tasks/index')
+    render_general( @tasks )
   end
 
   def show
-    load_task
-
-    render_task( @task )
+    return unless task_loaded?( params[:id] )
+    render_general( @task )
   end
 
   def abort
     load_task
 
-    #TODO add here some meat
-    @task.status = TASK_STATUS[:aborted]
-    @task.save!
+    @task = Task.last(:conditions => "artifact = '#{ARTIFACTS[:task]}' and artifact_id = '#{@task.id}' and action = '#{TASK_ACTIONS[:abort]}'")
 
-    render_task( @task )
-  end
-
-  private
-
-  def load_task
-    begin
-      @task = Task.find(params[:id])
-      return true
-    rescue ActiveRecord::RecordNotFound => e
-      logger.info "Task with id == '#{params[:id]}' not found!", e
+    if @task.nil?
+      @task = Task.new(:artifact => ARTIFACTS[:task], :artifact_id => @task.id, :action => TASK_ACTIONS[:abort], :description => "Abortting task with id = #{@task.id}.")
+      @task.save!
     end
-    false
-  end
 
-  def render_task( o, html_template = 'tasks/show' )
-    respond_to do |format|
-      format.html { render html_template }
-      format.yaml { render :text => convert_to_yaml( o ), :content_type => Mime::TEXT }
-      format.json { render :json => o }
-      format.xml { render :xml => o }
-    end
+    render_general( @task )
   end
-
 end
