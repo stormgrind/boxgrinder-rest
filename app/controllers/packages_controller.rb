@@ -11,44 +11,36 @@ class PackagesController < ApplicationController
 
   def show
     return unless package_loaded?( params[:id] )
-    render_general( @package )
-  end
-
-  def create
-    return unless image_loaded?(params[:image_id]) and image_valid?
-
-    @task = Task.last(:conditions => "image_id = '#{@image.id}'")
-
-    if is_image_status?( :built ) and @task.nil? or @task.action.eql?( IMAGE_ACTIONS[:build] )
-      archive_type = (params[:archive_type].nil? or PACKAGE_FORMAT.include?( params[:archive_type] )) ? :zip : params[:archive_type]
-
-      @task = Task.new( :artifact => :package, :action => PACKAGE_ACTIONS[:build], :description => "Creating package of image with id = #{@image.id}.", :params => [ archive_type ] )
-      @task.save!
-    end
-
-    render_task
-  end
-
-  # prepares an image to download
-  def download
-    return unless package_loaded?( params[:id] )
-
-    unless is_image_status?( :packaged )
-      respond_to do |format|
-        format.html { render :text => "Package first!" }
-      end
-      return
-    end
 
     respond_to do |format|
-      format.html { render :text=> 'Downloading...' }
-      format.yaml { render :text => convert_to_yaml( @image ), :content_type => Mime::TEXT }
-      format.json { render :json => @image }
-      format.xml { render :xml => @image }
+      format.html
+      format.yaml { render :text => convert_to_yaml( @package ), :content_type => Mime::TEXT }
+      format.json { render :json => @package }
+      format.xml { render :xml => @package }
       format.zip { render_archive }
       format.tar { render_archive }
       format.tgz { render_archive }
     end
   end
 
+  def create
+    return unless image_loaded?(params[:image_id]) and image_valid?
+
+    if params[:package_format].nil? or !PACKAGE_FORMATS.values.include?( params[:package_format].upcase )
+      package_format = PACKAGE_FORMATS[:zip]
+    else
+      package_format = params[:package_format].upcase
+    end
+
+    @package = Package.last( :conditions => { :image_id => @image.id, :package_format => package_format } )
+
+    if @package.nil?
+      @package = Package.new( :image_id => @image.id, :package_format => package_format, :description => "Package for image id = #{@image.id} in  #{@image.image_format} format. Selected package format: #{package_format}" )
+      @package.save!
+
+      Task.new( :artifact => ARTIFACTS[:package], :artifact_id => @package.id, :action => PACKAGE_ACTIONS[:build], :description => "Building package with id = #{@package.id}." ).save!
+    end
+
+    render_general( @package, 'packages/show' )
+  end
 end

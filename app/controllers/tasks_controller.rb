@@ -22,7 +22,7 @@ class TasksController < BaseController
   def abort
     load_task
 
-    @task = Task.last(:conditions => "artifact = '#{ARTIFACTS[:task]}' and artifact_id = '#{@task.id}' and action = '#{TASK_ACTIONS[:abort]}'")
+    @task = Task.last(:conditions =>  {:artifact => ARTIFACTS[:task], :artifact_id => @task.id, :action => TASK_ACTIONS[:abort]})
 
     if @task.nil?
       @task = Task.new(:artifact => ARTIFACTS[:task], :artifact_id => @task.id, :action => TASK_ACTIONS[:abort], :description => "Abortting task with id = #{@task.id}.")

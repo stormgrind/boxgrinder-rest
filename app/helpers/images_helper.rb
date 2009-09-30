@@ -3,12 +3,12 @@ module ImagesHelper
 
   private
 
-  def is_image_format?( type )
-    return false if @image.type.nil?
-    @image.type.eql?( type )
+  def is_image_format?( format )
+    return false if @image.image_format.nil?
+    @image.image_format.eql?( format )
   end
 
-  #OLD
+  # TO REVIEW
 
   def is_image_in_progress?
     return true if @image.status.eql?( IMAGE_STATUSES[:building] ) or @image.status.eql?( IMAGE_STATUSES[:converting] ) or @image.status.eql?( IMAGE_STATUSES[:packaging] )
@@ -21,14 +21,17 @@ module ImagesHelper
   end
 
   def image_valid?
-    return true unless is_image_status?( :invalid )
-
+    return true unless is_image_status?( :error )
     render_error( @error )
     false
   end
 
   def image_loaded?( id )
-    return false if id.nil? or !id.match(/\d+/)
+    if id.nil? or !id.match(/\d+/)
+      render_error(Error.new( "Invalid image id provided: #{id}" ))
+      return false
+    end
+
     begin
       @image = Image.find( id )
       return true
@@ -40,14 +43,5 @@ module ImagesHelper
     false
   end
 
-  def render_archive
-    head :not_found
 
-    if is_image_status?( :packaged )
-      #send_file 'aaa', :type => 'application/zip'
-    else
-      # if it is not packaged: head :not_found
-      #head :multiple_choices, :location => [ "#{image_path}.tar" ]
-    end
-  end
 end

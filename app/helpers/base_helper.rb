@@ -24,9 +24,9 @@ module BaseHelper
     end
   end
 
-  def render_general( o )
+  def render_general( o, html = nil )
     respond_to do |format|
-      format.html
+      format.html { render html unless html.nil? }
       format.yaml { render :text => convert_to_yaml( o ), :content_type => Mime::TEXT }
       format.json { render :json => o }
       format.xml { render :xml => o }

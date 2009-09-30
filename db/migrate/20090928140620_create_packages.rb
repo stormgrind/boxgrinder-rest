@@ -4,6 +4,7 @@ class CreatePackages < ActiveRecord::Migration
       t.references :image
       t.string :description
       t.string :status
+      t.string :package_format
       t.timestamps
     end
   end

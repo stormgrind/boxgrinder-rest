@@ -23,32 +23,26 @@ class ImagesController < BaseController
     end
 
     # image_format is optional, if no image_format paraeter is secified RAW format will be used
-    if params[:image_format].nil? or !IMAGE_FORMATS.values.include?( params[:image_format].upcase )
+    if params[:image_format].nil?
       image_format = IMAGE_FORMATS[:raw]
     else
+      unless IMAGE_FORMATS.values.include?( params[:image_format].upcase )
+        render_error( Error.new( "Invalid format speficied. Available formats: #{IMAGE_FORMATS.values.join(", ")}"))
+        return
+      end
       image_format = params[:image_format].upcase
     end
 
     # 1.check if there is an built image
-    begin
-      @image = Image.find( :conditions => "definition_id = '#{params[:definition_id]}' and image_format = '#{image_format}'" )
-      render_general( @image )
-      return
-    rescue ActiveRecord::RecordNotFound => e
-      # it's ok, don't worry
+    @image = Image.last( :conditions => { :definition_id => params[:definition_id], :image_format => image_format} )
+
+    if @image.nil?
+      @image = Image.new( :definition_id => params[:definition_id], :image_format => image_format, :description => "Image with for definition id = #{params[:definition_id]} and #{image_format} format." )
+      @image.save!
+      Task.new( :artifact => ARTIFACTS[:image], :artifact_id => @image.id, :action => IMAGE_ACTIONS[:build], :description => "Creating image from definition with id = #{params[:definition_id]}." ).save!
     end
 
-    task_params = Base64.encode64({'definition_id' => params[:definition_id], 'image_format' => image_format }.to_yaml)
-
-    # 2. check if there is a task for building this image
-    @task = Task.last(:conditions => "artifact = '#{ARTIFACTS[:image]}' and action = '#{IMAGE_ACTIONS[:build]}' and params = '#{task_params}'")
-
-    if @task.nil?
-      @task = Task.new( :artifact => ARTIFACTS[:image], :action => IMAGE_ACTIONS[:build], :params => task_params, :description => "Creating image from definition with id = #{params[:definition_id]}." )
-      @task.save!
-    end
-
-    render_task
+    render_general( @image, 'images/show' )
   end
 
   # convert image to specified type
@@ -63,7 +57,7 @@ class ImagesController < BaseController
 
     # if image format is not RAW
     unless is_image_format?( :raw )
-      render_error( Error.new( "Only RAW images can be converted, this image is in #{@image.type} format."))
+      render_error( Error.new( "Only RAW images can be converted, this image is in #{@image.image_format} format."))
       return
     end
 
@@ -73,37 +67,24 @@ class ImagesController < BaseController
       return
     end
 
-    begin
-      @image = Image.find( :conditions => "definition_id = '#{@image.definition_id}' and image_format = '#{params[:image_format].upcase}'" )
-      render_general( @image )
-      return
-    rescue ActiveRecord::RecordNotFound => e
-      # it's ok, don't worry
+    @image = Image.last( :conditions => { :definition_id => @image.definition_id, :image_format => params[:image_format].upcase} )
+
+    if @image.nil?
+      @image = Image.new( :definition_id => @image.definition_id, :image_format => params[:image_format].upcase, :description => "Image for definition id = #{@image.definition_id} and #{params[:image_format].upcase} format." )
+      @image.save!
     end
 
-    task_params = Base64.encode64({'image_format' => params[:image_format] }.to_yaml)
+    Task.new(:artifact => ARTIFACTS[:image], :artifact_id => @image.id, :action => IMAGE_ACTIONS[:convert], :description => "Converting image with id = #{params[:id]} to format #{params[:image_format].upcase}.").save!
 
-    @task = Task.last(:conditions => "artifact = '#{ARTIFACTS[:image]}' and artifact_id = '#{@image.id}' and action = '#{IMAGE_ACTIONS[:convert]}' and param = '#{task_params}'")
-
-    if @task.nil?
-      @task = Task.new( :artifact => ARTIFACTS[:image], :artifact_id => @image.id, :action => IMAGE_ACTIONS[:convert], :params => task_params, :description => "Converting image with id = #{params[:id]} to format #{params[:image_format].upcase}." )
-      @task.save!
-    end
-
-    render_task
+    render_general( @image, 'images/show' )
   end
 
   def destroy
     return unless image_loaded?( params[:id] )
 
-    @task = Task.last(:conditions => "artifact = '#{ARTIFACTS[:image]}' and artifact_id = '#{@image.id}' and action = '#{IMAGE_ACTIONS[:destroy]}'")
+    @image.status = IMAGE_STATUSES[:removed]
+    @image.delete
 
-    if @task.nil?
-      @task = Task.new(:artifact => ARTIFACTS[:image], :artifact_id => @image.id, :action => IMAGE_ACTIONS[:destroy], :description => "Destroing image with id = #{@image.id}.")
-      @task.save!
-    end
-
-    render_task
+    render_general( @image, 'images/show' )
   end
-
 end

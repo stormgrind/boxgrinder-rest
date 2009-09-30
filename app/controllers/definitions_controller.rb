@@ -9,26 +9,29 @@ class DefinitionsController < ApplicationController
   end
 
   def show
-    return unless definition_loaded?
+    return unless definition_loaded?( params[:id] )
     render_general( @definition )
   end
 
   def create
-    @task = Task.new( :artifact => ARTIFACTS[:definition], :action => DEFINITION_ACTIONS[:create], :description => "Creating new definition." )
+    # TODO add more info to desription
+    @definition = Definition.new( :description => "Definition.")
+    @definition.save!
 
-    # TODO add param with information about definition file
-    @task.params = 'TODO'
-    @task.save!
+    # TODO store somewhere uploaded definition file
+    Task.new( :artifact => ARTIFACTS[:definition], :artifact_id => @definition.id, :action => DEFINITION_ACTIONS[:create], :description => "Creating new definition." ).save!
 
-    render_task
+    render_general( @definition )
   end
 
   def destroy
-    return unless definition_loaded?
+    return unless definition_loaded?( params[:id] )
 
-    @task = Task.new( :artifact => ARTIFACTS[:definition], :action => DEFINITION_ACTIONS[:destroy], :artifact_id => @definition.id, :description => "Destroying definition with id == #{@definition.id}." )
-    @task.save!
+    @definition.status = DEFINITION_STATUSES[:removed]
+    @definition.delete
 
-    render_task
+    #Task.new( :artifact => ARTIFACTS[:definition], :artifact_id => @definition.id, :action => DEFINITION_ACTIONS[:destroy], :description => "Destroying definition with id == #{@definition.id}." ).save!
+
+    render_general( @definition, 'definitions/show' )
   end
 end
