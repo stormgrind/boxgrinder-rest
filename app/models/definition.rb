@@ -1,4 +1,7 @@
 class Definition < ActiveRecord::Base
+  ACTION = { :create => 'CREATE', :destroy => 'DESTROY' }
+  STATUS = { :new => 'NEW', :created => 'CREATED', :error => 'ERROR', :removed => 'REMOVED'}
+
   validates_presence_of :status, :description
 
   def initialize(attributes = nil)

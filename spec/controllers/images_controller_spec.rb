@@ -4,17 +4,17 @@ describe ImagesController do
 
   fixtures :images, :tasks
 
-  it "should create a task for destroying an image with id = 1" do
+  it "should delete image with id = 1" do
+    Image.count.should == 3
     delete 'destroy', :id => 1
+    Image.count.should == 2
 
-    task = assigns[:task]
+    image = assigns[:image]
 
-    task.status.should eql(Defaults::TASK_STATUSES[:new])
-    task.artifact.should eql(Defaults::ARTIFACTS[:image])
-    task.action.should eql(Defaults::IMAGE_ACTIONS[:destroy])
-    task.description.should eql("Destroing image with id = 1.")
+    image.should_not == nil
+    image.status.should eql(Image::STATUS[:removed])
 
-    response.should render_template('tasks/show')
+    response.should render_template('images/show')
   end
 
   it "should not create an task to build image because there is no definition_id and return to error" do
@@ -23,17 +23,20 @@ describe ImagesController do
     response.should render_template('root/error')
   end
 
-  it "should create a task for building new image" do
+  it "should create a new image" do
+    Image.count.should == 3
     post 'create', :definition_id => 1
+    Image.count.should == 4
+  
+    image = assigns[:image]
 
-    task = assigns[:task]
+    image.should_not == nil
+    image.status.should eql(Image::STATUS[:new])
+    image.image_format.should eql(Image::FORMAT[:raw])
+    image.definition_id.should == 1
+    image.description.should eql("Image for definition id = 1 and RAW format.")
 
-    task.status.should eql(Defaults::TASK_STATUSES[:new])
-    task.artifact.should eql(Defaults::ARTIFACTS[:image])
-    task.action.should eql(Defaults::IMAGE_ACTIONS[:build])
-    task.description.should eql("Creating image from definition with id = 1.")
-
-    response.should render_template('tasks/show')
+    response.should render_template('images/show')
   end
 
 end

@@ -9,33 +9,32 @@ describe DefinitionsController do
     1
   end
 
-  it "should create a new task for creating new definition" do
-    Task.all.size.should == tasks_fixtures_size
+  it "should create a new definition" do
+    Definition.count.should == 2
     post 'create'
-    Task.all.size.should == tasks_fixtures_size + 1
+    Definition.count.should == 3
 
-    task = Task.last
+    definition = assigns[:definition]
 
-    task.status.should eql(Defaults::TASK_STATUSES[:new])
-    task.artifact.should eql(Defaults::ARTIFACTS[:definition])
-    task.action.should eql(Defaults::DEFINITION_ACTIONS[:create])
+    definition.should_not == nil
+    definition.status.should eql(Definition::STATUS[:new])
+    definition.description.should eql("Definition.")
 
-    response.should render_template('tasks/show')
+    response.should render_template('definitions/show')
   end
 
-  it "should create a new task for deleting definition" do
-    Task.all.size.should == tasks_fixtures_size
+  it "should delete a definition" do
+    Definition.count.should == 2
     delete 'destroy', :id => 1
-    Task.all.size.should == tasks_fixtures_size + 1
+    Definition.count.should == 1
 
-    task = Task.last
+    definition = assigns[:definition]
 
-    task.status.should eql(Defaults::TASK_STATUSES[:new])
-    task.artifact.should eql(Defaults::ARTIFACTS[:definition])
-    task.artifact_id.should == 1
-    task.action.should eql(Defaults::DEFINITION_ACTIONS[:destroy])
+    definition.should_not == nil
+    definition.status.should eql(Definition::STATUS[:removed])
+    definition.description.should eql("This is a description of a definition")
 
-    response.should render_template('tasks/show')
+    response.should render_template('definitions/show')
   end
 
   it "should render an error because definition with id = 123 doesn't exists" do

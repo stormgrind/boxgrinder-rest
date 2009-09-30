@@ -21,7 +21,7 @@ class DefinitionsController < ApplicationController
     # TODO store somewhere uploaded definition file
     Task.new( :artifact => ARTIFACTS[:definition], :artifact_id => @definition.id, :action => DEFINITION_ACTIONS[:create], :description => "Creating new definition." ).save!
 
-    render_general( @definition )
+    render_general( @definition, 'definitions/show' )
   end
 
   def destroy

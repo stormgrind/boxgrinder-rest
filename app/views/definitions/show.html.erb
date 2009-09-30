@@ -33,5 +33,5 @@
   <% if is_definition_status?( :created ) %>
       <li><%= link_to "Build", { :action => :create, :controller => 'images', :definition_id => @definition.id.to_s}, :method => :post %></li>
   <% end %>
-  <li><%= link_to "Destroy", { :action => :destroy }, :method => :delete, :confirm => "Are you sure?" %> </li>
+  <li><%= link_to "Destroy", { :action => :destroy, :id => @definition.id }, :method => :delete, :confirm => "Are you sure?" %> </li>
 </ul>

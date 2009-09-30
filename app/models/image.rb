@@ -1,5 +1,8 @@
 class Image < ActiveRecord::Base
 
+  STATUS = { :new => 'NEW', :building => 'BUILDING', :built => 'BUILT', :error => 'ERROR', :removed => 'REMOVED' }
+  FORMAT = { :raw => 'RAW', :vmware => 'VMWARE', :ec2 => 'EC2' }
+
   validates_presence_of :status, :description
 
   belongs_to :definition

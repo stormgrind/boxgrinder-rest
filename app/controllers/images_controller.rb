@@ -37,7 +37,7 @@ class ImagesController < BaseController
     @image = Image.last( :conditions => { :definition_id => params[:definition_id], :image_format => image_format} )
 
     if @image.nil?
-      @image = Image.new( :definition_id => params[:definition_id], :image_format => image_format, :description => "Image with for definition id = #{params[:definition_id]} and #{image_format} format." )
+      @image = Image.new( :definition_id => params[:definition_id], :image_format => image_format, :description => "Image for definition id = #{params[:definition_id]} and #{image_format} format." )
       @image.save!
       Task.new( :artifact => ARTIFACTS[:image], :artifact_id => @image.id, :action => IMAGE_ACTIONS[:build], :description => "Creating image from definition with id = #{params[:definition_id]}." ).save!
     end
