@@ -46,8 +46,7 @@
 
           <% if is_image_status?(:built) %>
               <li><%= link_to "Convert to VMware", { :action => :convert, :image_format => 'vmware'}, :method => :post %> </li>
-              <li><%= link_to "Convert to EC2", :action => :convert, :image_type => 'ec2' %> </li>
-              <!-- TODO: make it better! -->
+              <li><%= link_to "Convert to EC2", { :action => :convert, :image_format => 'ec2'}, :method => :post %> </li>
               <li><%= link_to "Package to zip", { :controller => 'packages', :package_format => 'zip', :image_id => @image.id }, :method => :create %> </li>
               <li><%= link_to "Package tar", { :controller => 'packages',  :package_format => 'tar', :image_id => @image.id  }, :method => :create %> </li>
               <li><%= link_to "Package tgz", { :controller => 'packages', :package_format => 'tgz', :image_id => @image.id  }, :method => :create %> </li>

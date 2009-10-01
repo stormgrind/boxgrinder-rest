@@ -1,4 +1,6 @@
 require "base64"
+require 'queues/action_queue'
+require 'base64'
 
 class ImagesController < BaseController
   include ImagesHelper
@@ -67,14 +69,17 @@ class ImagesController < BaseController
       return
     end
 
-    @image = Image.last( :conditions => { :definition_id => @image.definition_id, :image_format => params[:image_format].upcase} )
+    image = Image.last( :conditions => { :definition_id => @image.definition_id, :image_format => params[:image_format].upcase} )
 
-    if @image.nil?
+    if image.nil?
       @image = Image.new( :definition_id => @image.definition_id, :image_format => params[:image_format].upcase, :description => "Image for definition id = #{@image.definition_id} and #{params[:image_format].upcase} format." )
-      @image.save!
-    end
+#      @image.save!
 
-    Task.new(:artifact => ARTIFACTS[:image], :artifact_id => @image.id, :action => Image::ACTIONS[:convert], :description => "Converting image with id = #{params[:id]} to format #{params[:image_format].upcase}.").save!
+      @image.id = 1
+      ActionQueue.enqueue( :execute, { :task => Base64.encode64(Task.new(:artifact => ARTIFACTS[:image], :artifact_id => @image.id, :action => Image::ACTIONS[:convert], :description => "Converting image with id = #{params[:id]} to format #{params[:image_format].upcase}.").to_yaml)})
+    else
+      @image = image
+    end
 
     render_general( @image, 'images/show' )
   end

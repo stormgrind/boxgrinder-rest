@@ -1,3 +1,5 @@
+#require 'action_queue'
+
 class DefinitionsController < ApplicationController
   include DefinitionsHelper
 
@@ -19,7 +21,8 @@ class DefinitionsController < ApplicationController
     @definition.save!
 
     # TODO store somewhere uploaded definition file
-    Task.new( :artifact => ARTIFACTS[:definition], :artifact_id => @definition.id, :action => Definition::ACTIONS[:create], :description => "Creating new definition." ).save!
+
+    #ActionQueue.enqueue( :execute, { :task => Task.new( :artifact => ARTIFACTS[:definition], :artifact_id => @definition.id, :action => Definition::ACTIONS[:create], :description => "Creating new definition." ) } )
 
     render_general( @definition, 'definitions/show' )
   end

@@ -6,29 +6,7 @@ namespace :db do
 
     include Defaults
 
-    [Task, Image, Definition, Package].each(&:delete_all)
-
-    Task.populate 20 do |t|
-      t.description = Populator.sentences(1..3)
-      t.status = Task::STATUSES.values
-      # we don't want to add task here
-      t.artifact = Defaults::ARTIFACTS.values.reject{|item| item.eql?(ARTIFACTS[:task])}
-
-      t.action =
-              case t.artifact
-                when ARTIFACTS[:image] then
-                  Image::ACTIONS.values
-                when ARTIFACTS[:definition] then
-                  Definition::ACTIONS.values
-                when ARTIFACTS[:package] then
-                  Package::ACTIONS.values
-              end
-
-      t.artifact_id = 1..20
-
-      t.created_at = 2.years.ago..1.year.ago
-      t.updated_at = 2.months.ago..Time.now
-    end
+    [Image, Definition, Package].each(&:delete_all)
 
     Definition.populate 10 do |d|
       d.description = Populator.sentences(1..3)
