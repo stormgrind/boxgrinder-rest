@@ -5,7 +5,7 @@ module PackagesHelper
 
   def is_package_status?( status )
     return false if @package.status.nil?
-    @package.status.eql?( PACKAGE_STATUSES[status] )
+    @package.status.eql?( Package::STATUSES[status] )
   end
 
   def package_loaded?( id )
@@ -30,7 +30,7 @@ module PackagesHelper
       if is_package_status?( :error )
         error = Error.new("Selected image (id = #{params[:id]}) is in #{@package.status} state. You cannot download this package.")
       else
-        error = Error.new("Selected image (id = #{params[:id]}) is in #{@package.status} state instead of #{PACKAGE_STATUSES[:created]}.")
+        error = Error.new("Selected image (id = #{params[:id]}) is in #{@package.status} state instead of #{Package::STATUSES[:created]}.")
       end
 
       render_error( error )

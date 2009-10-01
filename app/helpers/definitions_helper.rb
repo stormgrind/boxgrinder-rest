@@ -22,7 +22,7 @@ module DefinitionsHelper
 
   def is_definition_status?( status )
     return false if @definition.status.nil?
-    @definition.status.eql?( DEFINITION_STATUSES[status] )
+    @definition.status.eql?( Definition::STATUSES[status] )
   end
 
 end

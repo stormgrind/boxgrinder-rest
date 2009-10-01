@@ -1,9 +1,13 @@
 class Package < ActiveRecord::Base
+  FORMATS = { :zip => 'ZIP', :tar => 'TAR', :targz => 'TARGZ' }
+  ACTIONS = { :build => 'BUILD', :destroy => 'DESTROY' }
+  STATUSES = { :new => 'NEW', :creating => 'CREATING', :created => 'CREATED', :error => 'ERROR' }
+
   belongs_to :image
 
   def initialize(attributes = nil)
     super
-    self.status = Defaults::PACKAGE_STATUSES[:new]
+    self.status = STATUSES[:new]
     self.created_at = self.updated_at = Time.now
   end
 end

@@ -17,7 +17,7 @@ describe DefinitionsController do
     definition = assigns[:definition]
 
     definition.should_not == nil
-    definition.status.should eql(Definition::STATUS[:new])
+    definition.status.should eql(Definition::STATUSES[:new])
     definition.description.should eql("Definition.")
 
     response.should render_template('definitions/show')
@@ -31,7 +31,7 @@ describe DefinitionsController do
     definition = assigns[:definition]
 
     definition.should_not == nil
-    definition.status.should eql(Definition::STATUS[:removed])
+    definition.status.should eql(Definition::STATUSES[:removed])
     definition.description.should eql("This is a description of a definition")
 
     response.should render_template('definitions/show')
@@ -51,10 +51,10 @@ describe DefinitionsController do
   end
 
   it "should display a definition" do
-    definition = mock_model(Definition, :status => Defaults::DEFINITION_STATUSES[:created], :description => "desc", :created_at => Time.now, :updated_at => Time.now)
+    definition = mock_model(Definition, :status => Definition::STATUSES[:created], :description => "desc", :created_at => Time.now, :updated_at => Time.now)
     Definition.should_receive(:find).with("1").and_return(definition)
     get 'show', :id => 1
-    assigns[:definition].status.should eql(Defaults::DEFINITION_STATUSES[:created])
+    assigns[:definition].status.should eql(Definition::STATUSES[:created])
     response.should render_template('definitions/show')
   end
 

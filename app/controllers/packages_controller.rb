@@ -26,8 +26,8 @@ class PackagesController < ApplicationController
   def create
     return unless image_loaded?(params[:image_id]) and image_valid?
 
-    if params[:package_format].nil? or !PACKAGE_FORMATS.values.include?( params[:package_format].upcase )
-      package_format = PACKAGE_FORMATS[:zip]
+    if params[:package_format].nil? or !Package::FORMATS.values.include?( params[:package_format].upcase )
+      package_format = Package::FORMATS[:zip]
     else
       package_format = params[:package_format].upcase
     end
@@ -38,7 +38,7 @@ class PackagesController < ApplicationController
       @package = Package.new( :image_id => @image.id, :package_format => package_format, :description => "Package for image id = #{@image.id} in  #{@image.image_format} format. Selected package format: #{package_format}" )
       @package.save!
 
-      Task.new( :artifact => ARTIFACTS[:package], :artifact_id => @package.id, :action => PACKAGE_ACTIONS[:build], :description => "Building package with id = #{@package.id}." ).save!
+      Task.new( :artifact => ARTIFACTS[:package], :artifact_id => @package.id, :action => Package::ACTIONS[:build], :description => "Building package with id = #{@package.id}." ).save!
     end
 
     render_general( @package, 'packages/show' )

@@ -12,7 +12,7 @@ describe ImagesController do
     image = assigns[:image]
 
     image.should_not == nil
-    image.status.should eql(Image::STATUS[:removed])
+    image.status.should eql(Image::STATUSES[:removed])
 
     response.should render_template('images/show')
   end
@@ -31,8 +31,8 @@ describe ImagesController do
     image = assigns[:image]
 
     image.should_not == nil
-    image.status.should eql(Image::STATUS[:new])
-    image.image_format.should eql(Image::FORMAT[:raw])
+    image.status.should eql(Image::STATUSES[:new])
+    image.image_format.should eql(Image::FORMATS[:raw])
     image.definition_id.should == 1
     image.description.should eql("Image for definition id = 1 and RAW format.")
 

@@ -3,7 +3,7 @@ module TasksHelper
 
   def is_task_status?( status )
     return false if @task.status.nil?
-    @task.status.eql?( TASK_STATUSES[status] )
+    @task.status.eql?( Task::STATUSES[status] )
   end
 
   def task_loaded?( id )

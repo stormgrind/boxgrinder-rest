@@ -24,10 +24,10 @@ class ImagesController < BaseController
 
     # image_format is optional, if no image_format paraeter is secified RAW format will be used
     if params[:image_format].nil?
-      image_format = IMAGE_FORMATS[:raw]
+      image_format = Image::FORMATS[:raw]
     else
-      unless IMAGE_FORMATS.values.include?( params[:image_format].upcase )
-        render_error( Error.new( "Invalid format speficied. Available formats: #{IMAGE_FORMATS.values.join(", ")}"))
+      unless Image::FORMATS.values.include?( params[:image_format].upcase )
+        render_error( Error.new( "Invalid format speficied. Available formats: #{Image::FORMATS.values.join(", ")}"))
         return
       end
       image_format = params[:image_format].upcase
@@ -39,7 +39,7 @@ class ImagesController < BaseController
     if @image.nil?
       @image = Image.new( :definition_id => params[:definition_id], :image_format => image_format, :description => "Image for definition id = #{params[:definition_id]} and #{image_format} format." )
       @image.save!
-      Task.new( :artifact => ARTIFACTS[:image], :artifact_id => @image.id, :action => IMAGE_ACTIONS[:build], :description => "Creating image from definition with id = #{params[:definition_id]}." ).save!
+      Task.new( :artifact => ARTIFACTS[:image], :artifact_id => @image.id, :action => Image::ACTIONS[:build], :description => "Creating image from definition with id = #{params[:definition_id]}." ).save!
     end
 
     render_general( @image, 'images/show' )
@@ -50,7 +50,7 @@ class ImagesController < BaseController
     return unless image_loaded?( params[:id] ) and image_valid?
 
     # if there is no format specified
-    if (params[:image_format].nil? or !IMAGE_FORMATS.values.include?( params[:image_format].upcase ))
+    if (params[:image_format].nil? or !Image::FORMATS.values.include?( params[:image_format].upcase ))
       render_error( Error.new( "Invalid or no image_format parameter specified for converting image id = #{@image.id}}"))
       return
     end
@@ -74,7 +74,7 @@ class ImagesController < BaseController
       @image.save!
     end
 
-    Task.new(:artifact => ARTIFACTS[:image], :artifact_id => @image.id, :action => IMAGE_ACTIONS[:convert], :description => "Converting image with id = #{params[:id]} to format #{params[:image_format].upcase}.").save!
+    Task.new(:artifact => ARTIFACTS[:image], :artifact_id => @image.id, :action => Image::ACTIONS[:convert], :description => "Converting image with id = #{params[:id]} to format #{params[:image_format].upcase}.").save!
 
     render_general( @image, 'images/show' )
   end
@@ -82,7 +82,7 @@ class ImagesController < BaseController
   def destroy
     return unless image_loaded?( params[:id] )
 
-    @image.status = IMAGE_STATUSES[:removed]
+    @image.status = Image::STATUSES[:removed]
     @image.delete
 
     render_general( @image, 'images/show' )

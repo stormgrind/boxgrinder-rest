@@ -5,6 +5,6 @@ describe Image do
 
   it "should be in state BUILDING" do
     image = Image.find(1)
-    image.status.eql?(Defaults::IMAGE_STATUSES[:building])
+    image.status.eql?(Image::STATUSES[:building])
   end
 end
