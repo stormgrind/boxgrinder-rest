@@ -3,6 +3,7 @@ class CreateDefinitions < ActiveRecord::Migration
     create_table :definitions do |t|
       t.string :description
       t.string :status
+      t.string :file
 
       t.timestamps
     end
