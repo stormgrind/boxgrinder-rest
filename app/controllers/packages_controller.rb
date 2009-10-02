@@ -4,6 +4,9 @@ class PackagesController < ApplicationController
 
   layout 'actions'
 
+  before_filter :load_image, :only => [ :create, ]
+  before_filter :validate_image, :only => [ :create]
+
   def index
     @packages = Package.all
     render_general( @packages )
@@ -24,8 +27,6 @@ class PackagesController < ApplicationController
   end
 
   def create
-    return unless image_loaded?(params[:image_id]) and image_valid?
-
     if params[:package_format].nil? or !Package::FORMATS.values.include?( params[:package_format].upcase )
       package_format = Package::FORMATS[:zip]
     else

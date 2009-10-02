@@ -20,13 +20,36 @@ module ImagesHelper
     @image.status.eql?( Image::STATUSES[status] )
   end
 
-  def image_valid?
+  def image_saved?
+    if @image.nil?
+      logger.info "Creating new Image..."
+    else
+      logger.info "Saving Image with id = #{@image.id}..."
+    end
+
+    begin
+      Image.transaction do
+        @image.save!
+      end
+    rescue => e
+      render_error( Error.new("Could not create new image.", e) )
+      return false
+    end
+
+    logger.info "Image saved (id = #{@image.id})."
+    
+    true
+  end
+
+  def validate_image
     return true unless is_image_status?( :error )
     render_error( @error )
     false
   end
 
-  def image_loaded?( id )
+  def load_image
+    id = params[:id]
+
     if id.nil? or !id.match(/\d+/)
       render_error(Error.new( "Invalid image id provided: #{id}" ))
       return false
@@ -42,6 +65,4 @@ module ImagesHelper
     end
     false
   end
-
-
 end

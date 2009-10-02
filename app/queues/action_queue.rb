@@ -8,8 +8,6 @@ class ActionQueue
   def execute(payload={})
     task = YAML.load(Base64.decode64(payload[:task]))
 
-    puts Base64.decode64(payload[:task])
-
     log.info( "Received Task for artifact = #{task.artifact}, artifact_id = #{task.artifact_id} and action = #{task.action}" )
 
     case task.artifact
@@ -21,17 +19,25 @@ class ActionQueue
   private
 
   def execute_on_image( id, action )
-    image = Image.find( id )
+    begin
+      image = Image.find( id )
+    rescue ActiveRecord::RecordNotFound => e
+      log.fatal "Image with id = #{id} not found while executing task."
+      return
+    end
+
+    log.info "Executing task for Image with id = #{id}, action = #{action}..."
 
     sleep 10
 
     case action
       when Image::ACTIONS[:convert] then
-        puts "convert"
+        log.info "Converting image with id = #{id} to #{image.image_format}..."
 
     end
 
-    puts image.description
+
+
   end
 
 end

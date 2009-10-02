@@ -7,6 +7,8 @@ module BaseHelper
   def render_error( error )
     @error = error
 
+    logger.error( @error.message, @error.exception )
+
     respond_to do |format|
       format.html { render 'root/error' }
       format.yaml { render :text => convert_to_yaml( @error ), :content_type => Mime::TEXT }
