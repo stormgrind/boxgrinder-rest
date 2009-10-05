@@ -5,6 +5,7 @@
 <head>
   <title><%= api_name %> API v<%= api_version %></title>
   <%= stylesheet_link_tag 'main.css' %>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 </head>
 <body>
 
@@ -12,7 +13,14 @@
   <div id="header">
     <h2><%= api_name %> API v<%= api_version %></h2>
 
-    <p><%= bread_crumb -%></p>
+    <p>
+      <% for entry_point in entry_points do %>
+          <%= link_to entry_point[0], entry_point[1] %>
+      <% end %></p>
+
+    <hr/>
+
+    <%= bread_crumb -%>
   </div>
 
   <%= yield %>

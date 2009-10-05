@@ -21,7 +21,7 @@ module ImagesHelper
   end
 
   def image_saved?
-    if @image.nil?
+    if @image.id.nil?
       logger.info "Creating new Image..."
     else
       logger.info "Saving Image with id = #{@image.id}..."

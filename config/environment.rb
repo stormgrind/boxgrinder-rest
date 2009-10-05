@@ -20,8 +20,12 @@ Rails::Initializer.run do |config|
   # config.gem "sqlite3-ruby", :lib => "sqlite3"
   # config.gem "aws-s3", :lib => "aws/s3"
 
+  if RUBY_PLATFORM =~ /java/
+    config.gem "torquebox-gem"
+    config.gem "activerecord-jdbc-adapter", :lib=>'jdbc_adapter'
+  end
+
   config.gem "torquebox-rails"
-  config.gem "activerecord-jdbc-adapter", :lib=>'jdbc_adapter'
 
   # Only load the plugins named here, in the order given (default is alphabetical).
   # :all can be used as a placeholder for all plugins not explicitly named
@@ -42,5 +46,5 @@ Rails::Initializer.run do |config|
   # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}')]
   # config.i18n.default_locale = :de
 
-  config.active_record.schema_format = :sql
+  #config.active_record.schema_format = :sql
 end

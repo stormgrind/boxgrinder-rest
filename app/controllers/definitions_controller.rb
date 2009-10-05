@@ -3,7 +3,6 @@ require 'digest/md5'
 class DefinitionsController < ApplicationController
   include DefinitionsHelper
 
-  protect_from_forgery :except => :create
   layout 'actions'
   before_filter :validate_definition_file, :only => [ :create ]
 

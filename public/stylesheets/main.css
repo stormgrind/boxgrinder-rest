@@ -42,3 +42,21 @@ tr.header {
     background-color: #888;
     color: #fff;
 }
+
+ul.breadcrumb {
+    list-style: none;
+    padding: 0.5em;
+    margin: 0;
+}
+
+ul.breadcrumb li {
+    display: inline;
+    padding: 0;
+    margin: 0;
+}
+
+ul.breadcrumb li.subsequent:before {
+    content: " : ";
+    padding: 0;
+    margin: 0;
+}

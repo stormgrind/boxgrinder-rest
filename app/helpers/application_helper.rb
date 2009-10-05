@@ -1,7 +1,7 @@
 # Methods added to this helper will be available to all templates in the application.
 module ApplicationHelper
   def bread_crumb
-    s = "<ul class='breadcrumb'><li class='first'><a href='/'>Home</a></li>"
+    s = "<ul class='breadcrumb'><li class='first'><a href='/'>home</a></li>"
     url = request.path.split('?')  #remove extra query string parameters
     levels = url[0].split('/') #break up url into different levels
     levels.each_with_index do |level, index|
@@ -40,6 +40,14 @@ module ApplicationHelper
 
   def api_version
     "1.0.0"
+  end
+
+  def entry_points
+    [
+            [ :images, images_url ],
+            [ :packages, packages_url ],
+            [ :definitions, definitions_url ]
+    ]
   end
 
 end

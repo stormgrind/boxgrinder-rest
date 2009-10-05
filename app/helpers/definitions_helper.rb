@@ -26,31 +26,40 @@ module DefinitionsHelper
   end
 
   def validate_definition_file
-    msg         = nil
-    exception   = nil
+    msg                 = nil
+    exception           = nil
     definition_file     = params[:definition]
+
+    if definition_file.nil?
+      render_error( Error.new( "No definition parameter specified in your request." ) )
+      return
+    end
+
     definition_content  = params[:definition].read
 
-    msg = "Invalid content type, application/octet-stream expected. " unless definition_file.content_type.eql?("application/octet-stream")
-    
+    unless definition_file.content_type.eql?("application/octet-stream")
+      render_error( Error.new( "Invalid content type, application/octet-stream expected." ) )
+      return
+    end
+
     begin
       definition_yaml = YAML.load( definition_content )
     rescue => e
-      msg = "Not a valid YAML file"
-      exception = e
+      render_error( Error.new( "Not a valid YAML file", e) )
+      return
     end
 
     if definition_yaml.nil?
-      msg = "Not a valid YAML file"
-    else
-      msg = "Definition file doesn't contain description attribute." if definition_yaml['description'].nil?
+      render_error( Error.new( "Not a valid YAML file", e) )
+      return
     end
 
-    if msg.nil?
-      @definition_content  = definition_content
-      @definition_yaml     = definition_yaml
-    else
-      render_error( Error.new( msg, exception || nil ) )
+    if definition_yaml['description'].nil?
+      render_error( Error.new( "Definition file doesn't contain description attribute.") )
+      return
     end
+
+    @definition_content  = definition_content
+    @definition_yaml     = definition_yaml
   end
 end

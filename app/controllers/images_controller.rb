@@ -1,5 +1,4 @@
-require "base64"
-require 'queues/action_queue'
+require 'queues/action_queue' unless RAILS_ENV=='test'
 require 'base64'
 
 class ImagesController < BaseController
@@ -8,7 +7,6 @@ class ImagesController < BaseController
   before_filter :load_image, :except => [ :create, :index ]
   before_filter :validate_image, :except => [ :create, :index, :destroy ]
 
-  protect_from_forgery :except => :create
   layout 'actions'
 
   def index
@@ -35,7 +33,7 @@ class ImagesController < BaseController
       image_format = Image::FORMATS[:raw]
     else
       unless Image::FORMATS.values.include?( param_image_format.upcase )
-        render_error( Error.new( "Invalid format speficied. Available formats: #{Image::FORMATS.values.join(", ")}"))
+        render_error( Error.new( "Invalid format speficied. Available formats: #{Image::FORMATS.values.join(", ")}."))
         return
       end
       image_format = param_image_format.upcase
@@ -132,8 +130,19 @@ class ImagesController < BaseController
   end
 
   def destroy
-    @image.status = Image::STATUSES[:removed]
-    @image.delete
+    @image.status = Image::STATUSES[:removing]
+
+    return unless image_saved?
+
+    ActionQueue.enqueue(
+            :execute, {
+                    :task => Base64.encode64(Task.new(
+                            :artifact     => ARTIFACTS[:image],
+                            :artifact_id  => @image.id,
+                            :action       => Image::ACTIONS[:remove],
+                            :description  => "Removing image with id = #{@image.id}.").to_yaml)
+            }
+    )
 
     render_general( @image, 'images/show' )
   end

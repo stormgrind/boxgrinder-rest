@@ -2,13 +2,19 @@ one:
   id: 1
   description: "This is a description of an image"
   status: BUILDING
+  definition_id: 1
+  image_format: VMWARE
 
 two:
   id: 2
   description: "This is a description of an image"
   status: CREATED
+  definition_id: 1
+  image_format: RAW
 
 three:
   id: 3
   description: "This is a description of an image"
   status: ERROR
+  definition_id: 1
+  image_format: EC2

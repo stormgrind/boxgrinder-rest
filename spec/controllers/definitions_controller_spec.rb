@@ -3,25 +3,26 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 describe DefinitionsController do
   integrate_views
 
-  fixtures :tasks, :definitions
+  fixtures :definitions
 
-  def tasks_fixtures_size
-    1
-  end
-
-  it "should create a new definition" do
+  it "should not create a new definition because there is no definition file in request" do
     Definition.count.should == 2
     post 'create'
-    Definition.count.should == 3
+    Definition.count.should == 2
 
-    definition = assigns[:definition]
+    error = assigns[:error]
 
-    definition.should_not == nil
-    definition.status.should eql(Definition::STATUSES[:new])
-    definition.description.should eql("Definition.")
+    error.should_not == nil
+    error.message.should eql("No definition parameter specified in your request.")
 
-    response.should render_template('definitions/show')
+    response.should render_template('root/error')
   end
+
+  #definition = assigns[:definition]
+  #definition.should_not == nil
+  #definition.status.should eql(Definition::STATUSES[:new])
+  #definition.description.should eql("Definition.")
+  #response.should render_template('definitions/show')
 
   it "should delete a definition" do
     Definition.count.should == 2
@@ -38,20 +39,18 @@ describe DefinitionsController do
   end
 
   it "should render an error because definition with id = 123 doesn't exists" do
-    Task.all.size.should == tasks_fixtures_size
     get 'show', :id => 123
     response.should render_template('root/error')
   end
 
   it "should render an error because of unexpected error" do
-    Task.all.size.should == tasks_fixtures_size
     Definition.should_receive(:find).with("1").and_throw( "ERROR!")
     get 'show', :id => 1
     response.should render_template('root/error')
   end
 
   it "should display a definition" do
-    definition = mock_model(Definition, :status => Definition::STATUSES[:created], :description => "desc", :created_at => Time.now, :updated_at => Time.now)
+    definition = mock_model(Definition, :status => Definition::STATUSES[:created], :description => "desc", :created_at => Time.now, :updated_at => Time.now, :file => "/this/is/a/file")
     Definition.should_receive(:find).with("1").and_return(definition)
     get 'show', :id => 1
     assigns[:definition].status.should eql(Definition::STATUSES[:created])

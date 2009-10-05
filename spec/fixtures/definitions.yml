@@ -2,8 +2,10 @@ one:
   id: 1
   status: CREATED
   description: "This is a description of a definition"
+  file: "/home/aaa/bbb/sss"
 
 two:
   id: 2
-  status: ERROR
+  status: CREATED
   description: "This is a description of a definition"
+  file: "/home/aaa/bbb/sss"
