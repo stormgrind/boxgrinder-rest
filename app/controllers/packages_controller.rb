@@ -4,7 +4,8 @@ class PackagesController < ApplicationController
 
   layout 'actions'
 
-  before_filter :load_image, :only => [ :create, ]
+  before_filter :load_package, :except => [ :create, :index ]
+  before_filter :load_image, :only => [ :create ]
   before_filter :validate_image, :only => [ :create]
 
   def index
@@ -13,8 +14,6 @@ class PackagesController < ApplicationController
   end
 
   def show
-    return unless package_loaded?( params[:id] )
-
     respond_to do |format|
       format.html
       format.yaml { render :text => convert_to_yaml( @package ), :content_type => Mime::TEXT }
@@ -33,15 +32,37 @@ class PackagesController < ApplicationController
       package_format = params[:package_format].upcase
     end
 
-    @package = Package.last( :conditions => { :image_id => @image.id, :package_format => package_format } )
+    @package = Package.last(
+            :conditions => {
+                    :image_id => @image.id,
+                    :package_format => package_format
+            }
+    )
 
     if @package.nil?
-      @package = Package.new( :image_id => @image.id, :package_format => package_format, :description => "Package for image id = #{@image.id} in  #{@image.image_format} format. Selected package format: #{package_format}" )
-      @package.save!
+      @package = Package.new(
+              :image_id => @image.id,
+              :package_format => package_format,
+              :description => "Package for image id = #{@image.id} in  #{@image.image_format} format. Selected package format: #{package_format}"
+      )
 
-      Task.new( :artifact => ARTIFACTS[:package], :artifact_id => @package.id, :action => Package::ACTIONS[:build], :description => "Building package with id = #{@package.id}." ).save!
+      return unless object_saved?( @package )
+
+      ActionQueue.enqueue(
+              :execute, {
+                      :task => Base64.encode64(Task.new(
+                              :artifact => ARTIFACTS[:package],
+                              :artifact_id => @package.id,
+                              :action => Package::ACTIONS[:build],
+                              :description => "Building package with id = #{@package.id}." ).to_yaml)
+              }
+      )
     end
 
     render_general( @package, 'packages/show' )
+  end
+
+  def destroy
+
   end
 end

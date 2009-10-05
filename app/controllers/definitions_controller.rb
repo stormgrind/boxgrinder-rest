@@ -4,6 +4,7 @@ class DefinitionsController < ApplicationController
   include DefinitionsHelper
 
   layout 'actions'
+  before_filter :load_definition, :except => [ :create, :index ]
   before_filter :validate_definition_file, :only => [ :create ]
 
   def index
@@ -12,12 +13,12 @@ class DefinitionsController < ApplicationController
   end
 
   def show
-    return unless definition_loaded?( params[:id] )
     render_general( @definition )
   end
 
   def create
-    #log.info "Creating new definition..."
+    logger.info "Creating new definition..."
+
     @definition = Definition.new
 
     directory = "public/data"
@@ -27,10 +28,15 @@ class DefinitionsController < ApplicationController
     @definition.description = @definition_yaml['description']
     @definition.file = path
 
+    logger.info "Storing new definition in #{path} file..."
+
     if File.open(path, "w", 0644) { |f| f.write( @definition_content ) } > 0
       @definition.status = Definition::STATUSES[:created]
+
+      logger.info "Definition stored."
     else
       @definition.status = Definition::STATUSES[:error]
+      logger.info "Definition storing failed."
     end
 
     @definition.save!
@@ -39,7 +45,7 @@ class DefinitionsController < ApplicationController
   end
 
   def destroy
-    return unless definition_loaded?( params[:id] )
+    logger.info "Removing definition with id = #{@definition.id}..."
 
     @definition.status = Definition::STATUSES[:removed]
     @definition.delete

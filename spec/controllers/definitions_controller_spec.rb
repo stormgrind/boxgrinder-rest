@@ -61,6 +61,18 @@ describe DefinitionsController do
     response.should render_template('definitions/show')
   end
 
+  it "should display a definition in json format" do
+    request.env['HTTP_ACCEPT'] = "application/json"
+    get 'show', :id => 1
+
+    definition = assigns[:definition]
+    definition.should_not == nil
+    definition.status.should eql(Definition::STATUSES[:created])
+    definition.file.should eql("/home/aaa/bbb/sss")
+
+    response.body.should eql(assigns[:definition].to_json)
+  end
+
   it "should return a list of definitions" do
     get 'index'
     assigns[:definitions].size.should == definition_fixtures_size

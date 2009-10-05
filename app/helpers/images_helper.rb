@@ -20,27 +20,6 @@ module ImagesHelper
     @image.status.eql?( Image::STATUSES[status] )
   end
 
-  def image_saved?
-    if @image.id.nil?
-      logger.info "Creating new Image..."
-    else
-      logger.info "Saving Image with id = #{@image.id}..."
-    end
-
-    begin
-      Image.transaction do
-        @image.save!
-      end
-    rescue => e
-      render_error( Error.new("Could not create new image.", e) )
-      return false
-    end
-
-    logger.info "Image saved (id = #{@image.id})."
-    
-    true
-  end
-
   def validate_image
     return true unless is_image_status?( :error )
     render_error( @error )

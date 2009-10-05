@@ -5,6 +5,7 @@ end
 
 describe ImagesController do
 
+  integrate_views
   fixtures :images
 
   def image_fixtures_size
@@ -54,6 +55,20 @@ describe ImagesController do
     image.definition_id.should == 1
 
     response.should render_template('images/show')
+  end
+
+  it "should show selected image in yaml format" do
+    request.env['HTTP_ACCEPT'] = "text/yaml"
+    get 'show', :id => 1
+
+    image = assigns[:image]
+    assigns[:error].should == nil
+
+    image.status.should eql(Image::STATUSES[:building])
+    image.image_format.should eql(Image::FORMATS[:vmware])
+    image.definition_id.should == 1
+
+    response.body.should eql(image.attributes.to_yaml)
   end
 
   it "should not show selected image because there is no image with id = 123" do

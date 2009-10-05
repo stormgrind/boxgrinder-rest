@@ -3,7 +3,9 @@ module DefinitionsHelper
 
   private
 
-  def definition_loaded?( id )
+  def load_definition
+    id = params[:id]
+
     if id.nil? or !id.match(/\d+/)
       render_error(Error.new( "Invalid definition id provided: #{id}" ))
       return false

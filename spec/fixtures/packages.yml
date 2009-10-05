@@ -1,0 +1,13 @@
+one:
+  id: 1
+  status: CREATED
+  description: "This is a package number one."
+  image_id: 1
+  package_format: ZIP
+
+two:
+  id: 2
+  status: CREATED
+  description: "This is a package number two."
+  image_id: 1
+  package_format: TAR

@@ -55,7 +55,7 @@ class ImagesController < BaseController
               :description    => "Image for definition id = #{param_definition_id} and #{image_format} format."
       )
 
-      return unless image_saved?
+      return unless object_saved?( @image )
 
       ActionQueue.enqueue(
               :execute, {
@@ -111,7 +111,7 @@ class ImagesController < BaseController
               :description    => "Image for definition id = #{@image.definition_id} and #{param_image_format.upcase} format."
       )
 
-      return unless image_saved?
+      return unless object_saved?( @image )
 
       ActionQueue.enqueue(
               :execute, {
@@ -132,7 +132,7 @@ class ImagesController < BaseController
   def destroy
     @image.status = Image::STATUSES[:removing]
 
-    return unless image_saved?
+    return unless object_saved?( @image )
 
     ActionQueue.enqueue(
             :execute, {

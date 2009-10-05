@@ -34,4 +34,25 @@ module BaseHelper
       format.xml { render :xml => o }
     end
   end
+
+  def object_saved?(o)
+    if o.id.nil?
+      logger.info "Creating new #{o.class}..."
+    else
+      logger.info "Saving #{o.class} with id = #{o.id}..."
+    end
+
+    begin
+      ActiveRecord::Base.transaction do
+        o.save!
+      end
+    rescue => e
+      render_error( Error.new("Could not create new #{o.class}.", e) )
+      return false
+    end
+
+    logger.info "#{o.class} saved (id = #{o.id})."
+
+    true
+  end
 end

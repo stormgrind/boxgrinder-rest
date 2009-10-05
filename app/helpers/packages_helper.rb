@@ -8,7 +8,9 @@ module PackagesHelper
     @package.status.eql?( Package::STATUSES[status] )
   end
 
-  def package_loaded?( id )
+  def load_package
+    id = params[:id]
+
     if id.nil? or !id.match(/\d+/)
       render_error(Error.new( "Invalid package id provided: #{id}" ))
       return false
