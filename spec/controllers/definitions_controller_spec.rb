@@ -5,10 +5,14 @@ describe DefinitionsController do
 
   fixtures :definitions
 
+  def definition_fixtures_size
+    3
+  end
+
   it "should not create a new definition because there is no definition file in request" do
-    Definition.count.should == 2
+    Definition.count.should == definition_fixtures_size
     post 'create'
-    Definition.count.should == 2
+    Definition.count.should == definition_fixtures_size
 
     error = assigns[:error]
 
@@ -25,9 +29,9 @@ describe DefinitionsController do
   #response.should render_template('definitions/show')
 
   it "should delete a definition" do
-    Definition.count.should == 2
+    Definition.count.should == definition_fixtures_size
     delete 'destroy', :id => 1
-    Definition.count.should == 1
+    Definition.count.should == definition_fixtures_size - 1
 
     definition = assigns[:definition]
 
@@ -59,7 +63,7 @@ describe DefinitionsController do
 
   it "should return a list of definitions" do
     get 'index'
-    assigns[:definitions].size.should == 2
+    assigns[:definitions].size.should == definition_fixtures_size
     response.should render_template('definitions/index')
   end
 

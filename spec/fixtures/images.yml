@@ -14,7 +14,14 @@ two:
 
 three:
   id: 3
-  description: "This is a description of an image"
+  description: "This is a description of an EC2 image"
   status: ERROR
   definition_id: 1
   image_format: EC2
+
+four:
+  id: 4
+  description: "This is a description of an RAW image"
+  status: CREATED
+  definition_id: 3
+  image_format: RAW

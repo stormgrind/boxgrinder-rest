@@ -33,7 +33,7 @@ class ImagesController < BaseController
       image_format = Image::FORMATS[:raw]
     else
       unless Image::FORMATS.values.include?( param_image_format.upcase )
-        render_error( Error.new( "Invalid format speficied. Available formats: #{Image::FORMATS.values.join(", ")}."))
+        render_error( Error.new( "Invalid format speficied. Available formats: #{Image::FORMATS.values.sort.join(", ")}."))
         return
       end
       image_format = param_image_format.upcase
