@@ -1,7 +1,7 @@
 class Image < ActiveRecord::Base
 
   ACTIONS = { :build => 'BUILD', :package => 'PACKAGE', :convert => 'CONVERT', :remove => 'REMOVE' }
-  STATUSES = { :new => 'NEW', :building => 'BUILDING', :created => 'CREATED', :error => 'ERROR', :removed => 'REMOVED', :removing => 'REMOVING' }
+  STATUSES = { :new => 'NEW', :building => 'BUILDING', :built => 'BUILT', :error => 'ERROR', :removed => 'REMOVED', :removing => 'REMOVING' }
   FORMATS = { :raw => 'RAW', :vmware => 'VMWARE', :ec2 => 'EC2' }
 
   validates_presence_of :status, :description

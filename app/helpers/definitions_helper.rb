@@ -3,6 +3,10 @@ module DefinitionsHelper
 
   private
 
+  def definition_hash
+    Digest::MD5.hexdigest(@definition.created_at.to_s + @definition_file.to_s)
+  end
+
   def load_definition
     id = params[:id]
 
@@ -56,8 +60,8 @@ module DefinitionsHelper
       return
     end
 
-    if definition_yaml['description'].nil?
-      render_error( Error.new( "Definition file doesn't contain description attribute.") )
+    if definition_yaml['summary'].nil?
+      render_error( Error.new( "Definition file doesn't contain 'summary' attribute.") )
       return
     end
 

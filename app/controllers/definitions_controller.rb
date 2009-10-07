@@ -21,11 +21,18 @@ class DefinitionsController < ApplicationController
 
     @definition = Definition.new
 
-    directory = "public/data"
-    path = File.join(Rails.root, directory, @definition.created_at.strftime("%d-%m-%Y"),  Digest::MD5.hexdigest(@definition.created_at.to_s + @definition_file.to_s))
+    directory = "appliances"
+    hash = definition_hash
+
+    #while File.exists?( File.join(Rails.root, directory, hash ))
+    #  hash = definition_hash
+    #end
+
+    path = File.join(Rails.root, directory, hash, hash + '.appl')
+    
     FileUtils.mkdir_p( File.dirname(path), :mode => 0755 )
 
-    @definition.description = @definition_yaml['description']
+    @definition.description = @definition_yaml['summary']
     @definition.file = path
 
     logger.info "Storing new definition in #{path} file..."

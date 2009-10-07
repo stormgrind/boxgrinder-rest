@@ -3,7 +3,7 @@
 <table cellspacing="1" cellpadding="5">
   <tr class="row">
     <td>ID</td>
-    <td><%= @image.id %>
+    <td><%= link_to "Image #{@image.id}", :id => @image.id, :action => :show, :controller => 'images' %>
     </td>
   </tr>
   <tr class="row">

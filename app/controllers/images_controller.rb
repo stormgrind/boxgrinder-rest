@@ -5,7 +5,7 @@ class ImagesController < BaseController
   include ImagesHelper
 
   before_filter :load_image, :except => [ :create, :index ]
-  before_filter :validate_image, :except => [ :create, :index, :destroy ]
+  before_filter :validate_image, :only => [ :convert ]
 
   layout 'actions'
 
