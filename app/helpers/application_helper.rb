@@ -35,7 +35,7 @@ module ApplicationHelper
   end
 
   def api_name
-    "Grape"
+    "BoxGrinder REST"
   end
 
   def api_version

@@ -1,3 +1,3 @@
-$: << "#{File.dirname(__FILE__)}/../../lib/jboss-appliance-support/lib"
+$: << "#{File.dirname(__FILE__)}/../../lib/boxgrinder-build/lib"
 
-require 'jboss-cloud/defaults'
+require 'boxgrinder/defaults'
