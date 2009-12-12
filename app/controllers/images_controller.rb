@@ -1,4 +1,5 @@
 require 'queues/action_queue' unless RAILS_ENV=='test'
+require 'torquebox/queues'
 require 'base64'
 
 class ImagesController < BaseController
@@ -20,8 +21,8 @@ class ImagesController < BaseController
   end
 
   def create
-    param_definition_id   = params[:definition_id] || nil
-    param_image_format    = params[:image_format] || nil
+    param_definition_id = params[:definition_id] || nil
+    param_image_format = params[:image_format] || nil
 
     if param_definition_id.nil? or !param_definition_id.match(/\d+/)
       render_error( Error.new( "No or not valid definition_id parameter specified." ) )
@@ -42,32 +43,30 @@ class ImagesController < BaseController
     # 1.check if there is already a built image
     @image = Image.last(
             :conditions => {
-                    :definition_id  => param_definition_id,
-                    :image_format   => image_format
+                    :definition_id => param_definition_id,
+                    :image_format => image_format
             }
     )
 
     if @image.nil?
 
       @image = Image.new(
-              :definition_id  => param_definition_id,
-              :image_format   => image_format,
-              :description    => "Image for definition id = #{param_definition_id} and #{image_format} format."
+              :definition_id => param_definition_id,
+              :image_format => image_format,
+              :description => "Image for definition id = #{param_definition_id} and #{image_format} format."
       )
 
       return unless object_saved?( @image )
 
-      ActionQueue.enqueue(
-              :execute, {
-                      :task => Base64.encode64(Task.new(
-                              :artifact       => ARTIFACTS[:image],
-                              :artifact_id    => @image.id,
-                              :action         => Image::ACTIONS[:build],
-                              :description    => "Creating image from definition with id = #{param_definition_id}." ).to_yaml)
-              }
-      )
+      TorqueBox::Queues.enqueue( 'BoxGrinder::ActionQueue', :execute, {
+              :task => Base64.encode64(Task.new(
+                      :artifact => ARTIFACTS[:image],
+                      :artifact_id => @image.id,
+                      :action => Image::ACTIONS[:build],
+                      :description => "Creating image from definition with id = #{param_definition_id}." ).to_yaml)
+      } )
 
-      logger.info "New taks put into queue for #{ARTIFACTS[:image]} artifact, artifact_id #{@image.id} and action #{Image::ACTIONS[:build]}."
+      logger.info "New task put into queue for #{ARTIFACTS[:image]} artifact, artifact_id #{@image.id} and action #{Image::ACTIONS[:build]}."
     end
 
     render_general( @image, 'images/show' )
@@ -75,7 +74,7 @@ class ImagesController < BaseController
 
   # convert image to specified type
   def convert
-    param_image_format    = params[:image_format] || nil
+    param_image_format = params[:image_format] || nil
 
     # if there is no format specified
     if (param_image_format.nil? or !Image::FORMATS.values.include?( param_image_format.upcase ))
@@ -98,30 +97,29 @@ class ImagesController < BaseController
 
     image = Image.last(
             :conditions => {
-                    :definition_id  => @image.definition_id,
-                    :image_format   => param_image_format.upcase
+                    :definition_id => @image.definition_id,
+                    :image_format => param_image_format.upcase
             }
     )
 
     if image.nil?
 
       @image = Image.new(
-              :definition_id  => @image.definition_id,
-              :image_format   => param_image_format.upcase,
-              :description    => "Image for definition id = #{@image.definition_id} and #{param_image_format.upcase} format."
+              :definition_id => @image.definition_id,
+              :image_format => param_image_format.upcase,
+              :description => "Image for definition id = #{@image.definition_id} and #{param_image_format.upcase} format."
       )
 
       return unless object_saved?( @image )
 
-      ActionQueue.enqueue(
-              :execute, {
-                      :task => Base64.encode64(Task.new(
-                              :artifact     => ARTIFACTS[:image],
-                              :artifact_id  => @image.id,
-                              :action       => Image::ACTIONS[:convert],
-                              :description  => "Converting image with id = #{@image.id} to format #{param_image_format.upcase}.").to_yaml)
-              }
-      )
+      TorqueBox::Queues.enqueue( 'BoxGrinder::ActionQueue', :execute, {
+              :task => Base64.encode64(Task.new(
+                      :artifact => ARTIFACTS[:image],
+                      :artifact_id => @image.id,
+                      :action => Image::ACTIONS[:convert],
+                      :description => "Converting image with id = #{@image.id} to format #{param_image_format.upcase}.").to_yaml)
+      } )
+
     else
       @image = image
     end
@@ -134,15 +132,13 @@ class ImagesController < BaseController
 
     return unless object_saved?( @image )
 
-    ActionQueue.enqueue(
-            :execute, {
-                    :task => Base64.encode64(Task.new(
-                            :artifact     => ARTIFACTS[:image],
-                            :artifact_id  => @image.id,
-                            :action       => Image::ACTIONS[:remove],
-                            :description  => "Removing image with id = #{@image.id}.").to_yaml)
-            }
-    )
+    TorqueBox::Queues.enqueue( 'BoxGrinder::ActionQueue', :execute, {
+            :task => Base64.encode64(Task.new(
+                    :artifact => ARTIFACTS[:image],
+                    :artifact_id => @image.id,
+                    :action => Image::ACTIONS[:remove],
+                    :description => "Removing image with id = #{@image.id}.").to_yaml)
+    } )
 
     render_general( @image, 'images/show' )
   end

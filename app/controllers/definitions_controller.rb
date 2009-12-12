@@ -37,7 +37,7 @@ class DefinitionsController < ApplicationController
 
     logger.info "Storing new definition in #{path} file..."
 
-    if File.open(path, "w", 0644) { |f| f.write( @definition_content ) } > 0
+    if File.open(path, "w") { |f| f.write( @definition_content ) } > 0
       @definition.status = Definition::STATUSES[:created]
 
       logger.info "Definition stored."
