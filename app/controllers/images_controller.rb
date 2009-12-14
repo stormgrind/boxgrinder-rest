@@ -58,13 +58,12 @@ class ImagesController < BaseController
 
       return unless object_saved?( @image )
 
-      TorqueBox::Queues.enqueue( 'BoxGrinder::ActionQueue', :execute, {
-              :task => Base64.encode64(Task.new(
-                      :artifact => ARTIFACTS[:image],
-                      :artifact_id => @image.id,
-                      :action => Image::ACTIONS[:build],
-                      :description => "Creating image from definition with id = #{param_definition_id}." ).to_yaml)
-      } )
+      TorqueBox::Queues.enqueue( 'ActionQueue', :execute, Base64.encode64(Task.new(
+              :artifact => ARTIFACTS[:image],
+              :artifact_id => @image.id,
+              :action => Image::ACTIONS[:build],
+              :description => "Creating image from definition with id = #{param_definition_id}." ).to_yaml)
+      )
 
       logger.info "New task put into queue for #{ARTIFACTS[:image]} artifact, artifact_id #{@image.id} and action #{Image::ACTIONS[:build]}."
     end
@@ -112,13 +111,12 @@ class ImagesController < BaseController
 
       return unless object_saved?( @image )
 
-      TorqueBox::Queues.enqueue( 'BoxGrinder::ActionQueue', :execute, {
-              :task => Base64.encode64(Task.new(
-                      :artifact => ARTIFACTS[:image],
-                      :artifact_id => @image.id,
-                      :action => Image::ACTIONS[:convert],
-                      :description => "Converting image with id = #{@image.id} to format #{param_image_format.upcase}.").to_yaml)
-      } )
+      TorqueBox::Queues.enqueue( 'ActionQueue', :execute, Base64.encode64(Task.new(
+              :artifact => ARTIFACTS[:image],
+              :artifact_id => @image.id,
+              :action => Image::ACTIONS[:convert],
+              :description => "Converting image with id = #{@image.id} to format #{param_image_format.upcase}.").to_yaml)
+      )
 
     else
       @image = image
@@ -132,13 +130,12 @@ class ImagesController < BaseController
 
     return unless object_saved?( @image )
 
-    TorqueBox::Queues.enqueue( 'BoxGrinder::ActionQueue', :execute, {
-            :task => Base64.encode64(Task.new(
-                    :artifact => ARTIFACTS[:image],
-                    :artifact_id => @image.id,
-                    :action => Image::ACTIONS[:remove],
-                    :description => "Removing image with id = #{@image.id}.").to_yaml)
-    } )
+    TorqueBox::Queues.enqueue( 'ActionQueue', :execute, Base64.encode64(Task.new(
+            :artifact => ARTIFACTS[:image],
+            :artifact_id => @image.id,
+            :action => Image::ACTIONS[:remove],
+            :description => "Removing image with id = #{@image.id}.").to_yaml)
+    )
 
     render_general( @image, 'images/show' )
   end

@@ -8,6 +8,8 @@ class Image < ActiveRecord::Base
 
   belongs_to :definition
 
+  self.skip_time_zone_conversion_for_attributes=[]
+
   def initialize(attributes = nil)
     super
     self.status = STATUSES[:new]
