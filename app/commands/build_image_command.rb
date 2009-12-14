@@ -11,17 +11,16 @@ class BuildImageCommand
   def execute
     logger.info "Building image with id = #{@image.id} and #{@image.image_format} format..."
 
-    file_name = File.basename( @definition.file, '.appl' )
-
+    name = YAML.load_file( @definition.file )['name']
     command = nil
 
     case @image.image_format
       when 'VMWARE' then
-        command = "appliance:#{file_name}:vmware:personal appliance:#{file_name}:vmware:enterprise"
+        command = "appliance:#{name}:vmware:personal appliance:#{name}:vmware:enterprise"
       when 'EC2' then
-        command = "appliance:#{file_name}:ec2"
+        command = "appliance:#{name}:ec2"
       when 'RAW' then
-        command = "appliance:#{file_name}"
+        command = "appliance:#{name}"
     end
 
     @image.status = Image::STATUSES[:building]
@@ -31,7 +30,7 @@ class BuildImageCommand
 
     if $?.to_i != 0
       @image.status = Image::STATUSES[:error]
-      logger.error "An error occured while building image with id = #{@image.id}. Choeck logs for more info."
+      logger.error "An error occured while building image with id = #{@image.id}. Check logs for more info."
     else
       @image.status = Image::STATUSES[:built]
       logger.info "Image with id = #{@image.id} was built successfully."

@@ -22,7 +22,7 @@ class ActionQueue
         execute_on_image
     end
 
-    log.info "Task executed."
+    log.info "Task id = #{@task.id} executed."
   end
 
   private
@@ -39,7 +39,9 @@ class ActionQueue
       when Image::ACTIONS[:build] then
         BuildImageCommand.new( image ).execute
       when Image::ACTIONS[:convert] then
+      when Image::ACTIONS[:remove] then
 
     end
   end
 end
+

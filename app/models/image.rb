@@ -1,5 +1,4 @@
 class Image < ActiveRecord::Base
-
   ACTIONS = { :build => 'BUILD', :package => 'PACKAGE', :convert => 'CONVERT', :remove => 'REMOVE' }
   STATUSES = { :new => 'NEW', :building => 'BUILDING', :built => 'BUILT', :error => 'ERROR', :removed => 'REMOVED', :removing => 'REMOVING' }
   FORMATS = { :raw => 'RAW', :vmware => 'VMWARE', :ec2 => 'EC2' }
@@ -7,8 +6,6 @@ class Image < ActiveRecord::Base
   validates_presence_of :status, :description
 
   belongs_to :definition
-
-  self.skip_time_zone_conversion_for_attributes=[]
 
   def initialize(attributes = nil)
     super
