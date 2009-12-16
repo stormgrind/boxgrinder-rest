@@ -137,6 +137,6 @@ class ImagesController < BaseController
             :description => "Removing image with id = #{@image.id}.").to_yaml)
     )
 
-    render_general( @image, 'images/show' )
+    redirect_to images_path
   end
 end

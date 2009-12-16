@@ -2,6 +2,7 @@ require 'torquebox/queues/base'
 require 'base64'
 require 'yaml'
 require 'commands/build_image_command'
+require 'commands/remove_image_command'
 
 module BoxGrinder
   class ActionQueue
@@ -23,7 +24,7 @@ module BoxGrinder
           execute_on_image
       end
 
-      log.info "Task id = #{@task.id} executed."
+      log.info "Task executed."
     end
 
     private
@@ -41,6 +42,7 @@ module BoxGrinder
           BuildImageCommand.new( image ).execute
         when Image::ACTIONS[:convert] then
         when Image::ACTIONS[:remove] then
+          RemoveImageCommand.new( image ).execute
 
       end
     end

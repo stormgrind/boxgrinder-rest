@@ -1,3 +1,7 @@
+require 'boxgrinder/validator/appliance-definition-validator'
+require 'boxgrinder/config'
+require 'boxgrinder/helpers/appliance-config-helper'
+
 module DefinitionsHelper
   include BaseHelper
 
@@ -42,13 +46,8 @@ module DefinitionsHelper
 
     appliance_definitions[appliance_definition_yaml['name']] = { :definition => appliance_definition_yaml, :file => appliance_definition_file }
 
-    begin
-      appliance_config = BoxGrinder::ApplianceConfigHelper.new( appliance_definitions ).merge( BoxGrinder::ApplianceConfig.new( { :definition => appliance_definition_yaml, :file => appliance_definition_file } ) )
-      BoxGrinder::ApplianceDefinitionValidator.new( appliance_definition_yaml, appliance_definition_file ).validate
-    rescue => e
-      render_error( Error.new( "Appliance file is NOT valid.", e ))
-      return false
-    end
+    appliance_config = BoxGrinder::ApplianceConfigHelper.new( appliance_definitions ).merge( BoxGrinder::ApplianceConfig.new( { :definition => appliance_definition_yaml, :file => appliance_definition_file } ) )
+    BoxGrinder::ApplianceDefinitionValidator.new( appliance_definition_yaml, appliance_definition_file ).validate
 
     appliance_config
   end

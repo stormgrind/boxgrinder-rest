@@ -28,10 +28,13 @@ class DefinitionsController < ApplicationController
     tmp_definition_file = File.join(Rails.root, "appliances_tmp", @definition_yaml['name'] + '.appl')
     FileUtils.mkdir_p( File.dirname( tmp_definition_file ), :mode => 0755 )
     File.open(tmp_definition_file, "w") { |f| f.write( @definition_content ) }
-
-    appliance_config = read_appliance_config( tmp_definition_file )
-
-    return unless appliance_config
+    
+    begin
+      appliance_config = read_appliance_config( tmp_definition_file )
+    rescue => e
+      render_error( Error.new( "Appliance file is NOT valid.", e ))
+      return
+    end
 
     @definition = Definition.new
     @definition.name = appliance_config.name

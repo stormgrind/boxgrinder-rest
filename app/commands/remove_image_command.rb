@@ -12,42 +12,33 @@ class RemoveImageCommand
   def execute
     logger.info "Removing image with id = #{@image.id} and #{@image.image_format} format..."
 
-    appliance_config = read_appliance_config( @definition.file )
+    begin
+      appliance_config = read_appliance_config( @definition.file )
+    rescue => e
+      logger.error "Appliance file is NOT valid."
+      logger.error e
+    end
 
-    puts appliance_config.path.dir.raw.build
-    puts appliance_config.path.dir.ec2.build
-    puts appliance_config.path.dir.vmware.build
-
-
-    return
-    
-    name = YAML.load_file( @definition.file )['name']
-    command = nil
-
-    puts name
+    directory = nil
 
     case @image.image_format
       when 'VMWARE' then
-        command = "build/appliances appliance:#{name}:vmware:personal appliance:#{name}:vmware:enterprise"
+        directory = appliance_config.path.dir.vmware.build
       when 'EC2' then
-        command = "appliance:#{name}:ec2"
+        directory = appliance_config.path.dir.ec2.build
       when 'RAW' then
-        command = "appliance:#{name}"
+        directory = appliance_config.path.dir.raw.build
     end
 
-    @image.status = Image::STATUSES[:building]
-    save_object( @image )
-
-    `cd #{Rails.root} && /bin/bash -c 'rake -f appliance-support.rake #{command}'`
+    `cd #{Rails.root} && /bin/bash -c 'rm -rf #{directory}'`
 
     if $?.to_i != 0
       @image.status = Image::STATUSES[:error]
       logger.error "An error occured while building image with id = #{@image.id}. Check logs for more info."
     else
-      @image.status = Image::STATUSES[:built]
-      logger.info "Image with id = #{@image.id} was built successfully."
+      logger.info "Image with id = #{@image.id} was successfully removed."
     end
 
-    save_object( @image )
+    Image.destroy( @image.id )
   end
 end
