@@ -1,4 +1,4 @@
-require 'queues/action_queue' unless RAILS_ENV=='test'
+require 'queues/box_grinder/action_queue' unless RAILS_ENV=='test'
 require 'torquebox/queues'
 require 'base64'
 
@@ -58,7 +58,7 @@ class ImagesController < BaseController
 
       return unless object_saved?( @image )
 
-      TorqueBox::Queues.enqueue( 'ActionQueue', :execute, Base64.encode64(Task.new(
+      TorqueBox::Queues.enqueue( 'BoxGrinder::ActionQueue', :execute, Base64.encode64(Task.new(
               :artifact => ARTIFACTS[:image],
               :artifact_id => @image.id,
               :action => Image::ACTIONS[:build],
@@ -111,7 +111,7 @@ class ImagesController < BaseController
 
       return unless object_saved?( @image )
 
-      TorqueBox::Queues.enqueue( 'ActionQueue', :execute, Base64.encode64(Task.new(
+      TorqueBox::Queues.enqueue( 'BoxGrinder::ActionQueue', :execute, Base64.encode64(Task.new(
               :artifact => ARTIFACTS[:image],
               :artifact_id => @image.id,
               :action => Image::ACTIONS[:convert],
@@ -130,7 +130,7 @@ class ImagesController < BaseController
 
     return unless object_saved?( @image )
 
-    TorqueBox::Queues.enqueue( 'ActionQueue', :execute, Base64.encode64(Task.new(
+    TorqueBox::Queues.enqueue( 'BoxGrinder::ActionQueue', :execute, Base64.encode64(Task.new(
             :artifact => ARTIFACTS[:image],
             :artifact_id => @image.id,
             :action => Image::ACTIONS[:remove],

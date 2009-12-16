@@ -4,13 +4,14 @@
     <table cellspacing="1" cellpadding="5">
       <tr class="header">
         <th>ID</th>
+        <th>Definition name</th>
         <th>Definition status</th>
         <th>Definition description</th>
       </tr>
       <% for definition in @definitions %>
           <tr class="row">
-            <td>
-              <%= link_to "#{definition.id}", definition %></td>
+            <td><%= link_to "#{definition.id}", definition %></td>
+            <td><%= link_to "#{definition.name}", definition %></td>
             <td><%= definition.status %></td>
             <td><%= definition.description %></td>
           </tr>

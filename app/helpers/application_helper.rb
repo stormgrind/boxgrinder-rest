@@ -39,7 +39,7 @@ module ApplicationHelper
   end
 
   def api_version
-    "1.0.0"
+    "1.0.0.Beta1"
   end
 
   def entry_points

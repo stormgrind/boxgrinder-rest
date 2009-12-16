@@ -1,6 +1,7 @@
 class CreateDefinitions < ActiveRecord::Migration
   def self.up
     create_table :definitions do |t|
+      t.string :name, :limit => 100, :null => false
       t.string :description, :limit => 1000, :null => false
       t.string :status, :limit => 50, :null => false
       t.string :file, :limit => 100, :null => false

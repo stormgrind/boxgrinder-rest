@@ -12,6 +12,7 @@
 ActiveRecord::Schema.define(:version => 20090928140620) do
 
   create_table "definitions", :force => true do |t|
+    t.string   "name",        :limit => 100,  :null => false
     t.string   "description", :limit => 1000, :null => false
     t.string   "status",      :limit => 50,   :null => false
     t.string   "file",        :limit => 100,  :null => false

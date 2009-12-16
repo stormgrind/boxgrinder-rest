@@ -2,7 +2,7 @@ class Definition < ActiveRecord::Base
   ACTIONS = { :create => 'CREATE', :destroy => 'DESTROY' }
   STATUSES = { :new => 'NEW', :created => 'CREATED', :error => 'ERROR', :removed => 'REMOVED'}
 
-  validates_presence_of :status, :description
+  validates_presence_of :name, :status, :description
 
   def initialize(attributes = nil)
     super

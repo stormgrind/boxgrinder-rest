@@ -60,11 +60,6 @@ module DefinitionsHelper
       return
     end
 
-    if definition_yaml['summary'].nil?
-      render_error( Error.new( "Definition file doesn't contain 'summary' attribute.") )
-      return
-    end
-
     @definition_content  = definition_content
     @definition_yaml     = definition_yaml
   end
