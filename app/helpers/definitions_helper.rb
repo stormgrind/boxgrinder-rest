@@ -31,17 +31,44 @@ module DefinitionsHelper
     @definition.status.eql?( Definition::STATUSES[status] )
   end
 
+  def read_appliance_config( appliance_definition_file )
+
+    appliance_definition_yaml = YAML.load_file( appliance_definition_file )
+    appliance_definitions = {}
+
+    # TODO why I cannot specify an array of arguments for Dir[]?!
+    Dir[ "#{File.dirname( __FILE__ )}/../../lib/boxgrinder-build/appliances/*.appl" ].each { |def_file| read_appliance_definition(def_file, appliance_definitions) }
+    Dir[ File.join(Rails.root, 'appliances', '*.appl') ].each { |def_file| read_appliance_definition(def_file, appliance_definitions) }
+
+    appliance_definitions[appliance_definition_yaml['name']] = { :definition => appliance_definition_yaml, :file => appliance_definition_file }
+
+    begin
+      appliance_config = BoxGrinder::ApplianceConfigHelper.new( appliance_definitions ).merge( BoxGrinder::ApplianceConfig.new( { :definition => appliance_definition_yaml, :file => appliance_definition_file } ) )
+      BoxGrinder::ApplianceDefinitionValidator.new( appliance_definition_yaml, appliance_definition_file ).validate
+    rescue => e
+      render_error( Error.new( "Appliance file is NOT valid.", e ))
+      return false
+    end
+
+    appliance_config
+  end
+
+  def read_appliance_definition(appliance_definition_file, appliance_definitions)
+    appliance_definition = YAML.load_file( appliance_definition_file )
+    appliance_definitions[appliance_definition['name']] = { :definition => appliance_definition, :file => appliance_definition_file }
+  end
+
   def validate_definition_file
-    msg                 = nil
-    exception           = nil
-    definition_file     = params[:definition]
+    msg = nil
+    exception = nil
+    definition_file = params[:definition]
 
     if definition_file.nil?
       render_error( Error.new( "No definition parameter specified in your request." ) )
       return
     end
 
-    definition_content  = params[:definition].read
+    definition_content = params[:definition].read
 
     unless definition_file.content_type.eql?("application/octet-stream")
       render_error( Error.new( "Invalid content type, application/octet-stream expected." ) )
@@ -60,7 +87,7 @@ module DefinitionsHelper
       return
     end
 
-    @definition_content  = definition_content
-    @definition_yaml     = definition_yaml
+    @definition_content = definition_content
+    @definition_yaml = definition_yaml
   end
 end
