@@ -26,7 +26,7 @@ class BuildImageCommand
     @image.status = Image::STATUSES[:building]
     save_object( @image )
 
-    `cd #{Rails.root} && /bin/bash -c 'rake -f appliance-support.rake #{command}'`
+    `cd #{Rails.root} && PATH='/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin' /bin/bash -c 'rake -f boxgrinder.rake #{command}'`
 
     if $?.to_i != 0
       @image.status = Image::STATUSES[:error]

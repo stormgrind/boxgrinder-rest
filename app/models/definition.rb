@@ -4,6 +4,8 @@ class Definition < ActiveRecord::Base
 
   validates_presence_of :name, :status, :description
 
+  has_many :images
+
   def initialize(attributes = nil)
     super
     self.status = STATUSES[:new]
