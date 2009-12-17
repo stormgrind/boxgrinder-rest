@@ -10,7 +10,8 @@ module BoxGrinder
 
     def execute(payload)
       begin
-        @task = YAML.load(Base64.decode64(payload))
+        params = YAML.load(Base64.decode64(payload))
+        @task = params[:task]
       rescue => e
         log.error( "An error occured while decoding received task: #{payload}" )
         log.error( "#{e}" )
@@ -41,6 +42,7 @@ module BoxGrinder
         when Image::ACTIONS[:build] then
           BuildImageCommand.new( image ).execute
         when Image::ACTIONS[:convert] then
+          ConvertImageCommand.new( image ).execute
         when Image::ACTIONS[:remove] then
           RemoveImageCommand.new( image ).execute
 

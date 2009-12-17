@@ -30,7 +30,11 @@ class RemoveImageCommand
         directory = appliance_config.path.dir.raw.build
     end
 
-    `cd #{Rails.root} && /bin/bash -c 'rm -rf #{directory}'`
+    command = "cd #{Rails.root} && sudo /bin/bash -c 'rm -rf #{directory}'"
+
+    logger.debug "Executing command: #{command}"
+
+    `#{command}`
 
     if $?.to_i != 0
       @image.status = Image::STATUSES[:error]

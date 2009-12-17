@@ -48,11 +48,14 @@ class PackagesController < ApplicationController
 
       return unless object_saved?( @package )
 
-      TorqueBox::Queues.enqueue( 'BoxGrinder::ActionQueue', :execute, Base64.encode64(Task.new(
-              :artifact => ARTIFACTS[:package],
-              :artifact_id => @package.id,
-              :action => Package::ACTIONS[:build],
-              :description => "Building package with id = #{@package.id}." ).to_yaml)
+      TorqueBox::Queues.enqueue( 'BoxGrinder::ActionQueue', :execute,
+                                 Base64.encode64(
+                                         {:task => Task.new(
+                                                 :artifact => ARTIFACTS[:package],
+                                                 :artifact_id => @package.id,
+                                                 :action => Package::ACTIONS[:build],
+                                                 :description => "Building package with id = #{@package.id}." )
+                                         }.to_yaml)
       )
 
     end
