@@ -41,17 +41,20 @@
 <% unless is_image_in_progress? %>
     <h4>Available actions</h4>
     <ul>
-
       <% unless is_image_status?(:error) %>
-
           <% if is_image_status?(:built) %>
-              <li><%= link_to "Convert to VMware", { :action => :convert, :image_format => 'vmware'}, :method => :post %> </li>
-              <li><%= link_to "Convert to EC2", { :action => :convert, :image_format => 'ec2'}, :method => :post %> </li>
-              <li><%= link_to "Package to zip", { :controller => 'packages', :package_format => 'zip', :image_id => @image.id }, :method => :create %> </li>
-              <li><%= link_to "Package tar", { :controller => 'packages',  :package_format => 'tar', :image_id => @image.id  }, :method => :create %> </li>
-              <li><%= link_to "Package tgz", { :controller => 'packages', :package_format => 'tgz', :image_id => @image.id  }, :method => :create %> </li>
+
+              <li><%= link_to "Build RAW image", { :action => :create, :controller => 'images', :definition_id => @image.definition.id, :image_format => Image::FORMATS[:raw] }, :method => :post %></li>
+              <li><%= link_to "Build VMware image", { :action => :create, :controller => 'images', :definition_id => @image.definition.id, :image_format => Image::FORMATS[:vmware] }, :method => :post %></li>
+              <li><%= link_to "Build EC2 image", { :action => :create, :controller => 'images', :definition_id => @image.definition.id, :image_format => Image::FORMATS[:ec2] }, :method => :post %></li>
+
+              <!--              <li><%= link_to "Package to zip", { :controller => 'packages', :package_format => 'zip', :id => @image.id }, :method => :create %> </li>
+              <li><%= link_to "Package to tar", { :controller => 'packages',  :package_format => 'tar', :id => @image.id }, :method => :create %> </li>-->
+              <li><%= link_to "Package to tar.gz", { :controller => 'packages', :package_format => 'targz', :id => @image.id }, :method => :create %> </li>
+          <% end %>
+          <% unless is_image_status?(:building) %>
+              <li><%= link_to "Destroy", { :action => :destroy, :id => @image.id }, :method => :delete, :confirm => "Are you sure?" %> </li>
           <% end %>
       <% end %>
-      <li><%= link_to "Destroy", { :action => :destroy, :id => @image.id }, :method => :delete, :confirm => "Are you sure?" %> </li>
     </ul>
 <% end %>

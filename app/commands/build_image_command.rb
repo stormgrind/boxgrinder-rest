@@ -4,7 +4,7 @@ class BuildImageCommand
   include BaseCommand
 
   def initialize( image )
-    @image      = image
+    @image = image
     @definition = Definition.find( @image.definition_id )
   end
 
@@ -26,14 +26,13 @@ class BuildImageCommand
     @image.status = Image::STATUSES[:building]
     save_object( @image )
 
-    `cd #{Rails.root} && PATH='/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin' /bin/bash -c 'rake -f boxgrinder.rake #{command}'`
-
-    if $?.to_i != 0
-      @image.status = Image::STATUSES[:error]
-      logger.error "An error occured while building image with id = #{@image.id}. Check logs for more info."
-    else
+    begin
+      execute_command("cd #{Rails.root} && PATH='/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin' /bin/bash -c 'rake -f boxgrinder.rake #{command}'")
       @image.status = Image::STATUSES[:built]
       logger.info "Image with id = #{@image.id} was built successfully."
+    rescue
+      @image.status = Image::STATUSES[:error]
+      logger.error "An error occured while building image with id = #{@image.id}. Check logs for more info."
     end
 
     save_object( @image )

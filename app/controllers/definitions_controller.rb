@@ -2,6 +2,7 @@ require 'digest/md5'
 require 'boxgrinder/validator/appliance-definition-validator'
 require 'boxgrinder/config'
 require 'boxgrinder/helpers/appliance-config-helper'
+require 'torquebox/queues'
 
 class DefinitionsController < ApplicationController
   include DefinitionsHelper
@@ -28,7 +29,7 @@ class DefinitionsController < ApplicationController
     tmp_definition_file = File.join(Rails.root, "appliances_tmp", @definition_yaml['name'] + '.appl')
     FileUtils.mkdir_p( File.dirname( tmp_definition_file ), :mode => 0755 )
     File.open(tmp_definition_file, "w") { |f| f.write( @definition_content ) }
-    
+
     begin
       appliance_config = read_appliance_config( tmp_definition_file )
     rescue => e
@@ -64,11 +65,20 @@ class DefinitionsController < ApplicationController
   def destroy
     logger.info "Removing definition with id = #{@definition.id}..."
 
-    @definition.status = Definition::STATUSES[:removed]
-    @definition.delete
+    @definition.status = Definition::STATUSES[:removing]
 
-    #Task.new( :artifact => ARTIFACTS[:definition], :artifact_id => @definition.id, :action => DEFINITION_ACTIONS[:destroy], :description => "Destroying definition with id == #{@definition.id}." ).save!
+    return unless object_saved?( @definition )
 
-    render_general( @definition, 'definitions/show' )
+    TorqueBox::Queues.enqueue( 'BoxGrinder::ActionQueue', :execute,
+                               Base64.encode64(
+                                       { :task => Task.new(
+                                               :artifact => ARTIFACTS[:definition],
+                                               :artifact_id => @definition.id,
+                                               :action => Definition::ACTIONS[:remove],
+                                               :description => "Removing definition with id = #{@definition.id}.")
+                                       }.to_yaml)
+    )
+
+    redirect_to definitions_path
   end
 end

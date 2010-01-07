@@ -29,12 +29,12 @@ class ImagesController < BaseController
       return
     end
 
-    # image_format is optional, if no image_format paraeter is secified RAW format will be used
+    # image_format is optional, if no image_format parameter is specified; RAW format will be used
     if param_image_format.nil?
       image_format = Image::FORMATS[:raw]
     else
       unless Image::FORMATS.values.include?( param_image_format.upcase )
-        render_error( Error.new( "Invalid format speficied. Available formats: #{Image::FORMATS.values.sort.join(", ")}."))
+        render_error( Error.new( "Invalid format specified. Available formats: #{Image::FORMATS.values.sort.join(", ")}."))
         return
       end
       image_format = param_image_format.upcase
@@ -85,15 +85,14 @@ class ImagesController < BaseController
     end
 
     # if image format is not RAW
-    unless is_image_format?( :raw )
-      render_error( Error.new( "Only RAW images can be converted, this image is in #{@image.image_format} format."))
-      return
-    end
+    #unless is_image_format?( :raw )
+    #  render_error( Error.new( "Only RAW images can be converted, this image is in #{@image.image_format} format."))
+    #  return
+    #end
 
-    # TODO this is not good
     # if is in desired format
     if is_image_format?( param_image_format.downcase.to_sym )
-      render_error( Error.new( "Image is in #{param_image_format.upcase} format, no conversion needed."))
+      render_general( @image, 'images/show' )
       return
     end
 
@@ -119,7 +118,7 @@ class ImagesController < BaseController
                                          {:task => Task.new(
                                                  :artifact => ARTIFACTS[:image],
                                                  :artifact_id => @image.id,
-                                                 :action => Image::ACTIONS[:convert],
+                                                 :action => Image::ACTIONS[:build],
                                                  :description => "Converting image with id = #{@image.id} to format #{param_image_format.upcase}."),
                                           :format => param_image_format.upcase
                                          }.to_yaml)
@@ -133,6 +132,13 @@ class ImagesController < BaseController
   end
 
   def destroy
+    unless [ Image::STATUSES[:new], Image::STATUSES[:built], Image::STATUSES[:error] ].include?(@image.status)
+      render_error( Error.new( "Current image status (#{@image.status}) doesn't allow to remove it. Try again later."))
+      return
+    end
+
+    logger.info "Removing image with id = #{@image.id}..."
+
     @image.status = Image::STATUSES[:removing]
 
     return unless object_saved?( @image )

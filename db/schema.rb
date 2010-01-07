@@ -15,13 +15,14 @@ ActiveRecord::Schema.define(:version => 20090928140620) do
     t.string   "name",        :limit => 100,  :null => false
     t.string   "description", :limit => 1000, :null => false
     t.string   "status",      :limit => 50,   :null => false
-    t.string   "file",        :limit => 100,  :null => false
+    t.string   "file",        :limit => 200,  :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
   create_table "images", :force => true do |t|
     t.integer  "definition_id",                 :null => false
+    t.string   "name",          :limit => 50
     t.string   "description",   :limit => 1000, :null => false
     t.string   "status",        :limit => 20,   :null => false
     t.string   "image_format",  :limit => 20,   :null => false
@@ -33,6 +34,7 @@ ActiveRecord::Schema.define(:version => 20090928140620) do
     t.integer  "image_id",                       :null => false
     t.string   "description",    :limit => 1000, :null => false
     t.string   "status",                         :null => false
+    t.string   "file",           :limit => 200,  :null => false
     t.string   "package_format", :limit => 50,   :null => false
     t.datetime "created_at"
     t.datetime "updated_at"

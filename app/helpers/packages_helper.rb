@@ -1,11 +1,20 @@
+require 'rbconfig'
+require 'definitions_helper'
+
 module PackagesHelper
   include BaseHelper
+  include DefinitionsHelper
 
   private
 
   def is_package_status?( status )
     return false if @package.status.nil?
     @package.status.eql?( Package::STATUSES[status] )
+  end
+
+  def is_package_in_progress?
+    return true if @package.status.eql?( Package::STATUSES[:building] )
+    false
   end
 
   def load_package
@@ -28,20 +37,23 @@ module PackagesHelper
   end
 
   def render_archive
-    unless is_package_status?( :created )
-      if is_package_status?( :error )
-        error = Error.new("Selected image (id = #{params[:id]}) is in #{@package.status} state. You cannot download this package.")
-      else
-        error = Error.new("Selected image (id = #{params[:id]}) is in #{@package.status} state instead of #{Package::STATUSES[:created]}.")
-      end
+    unless is_package_status?( :built )
+      error = Error.new("Selected image (id = #{params[:id]}) is in #{@package.status} state. You cannot download this package.")
 
       render_error( error )
       return
     end
 
-    head :not_found
+    case @package.package_format
+      when Package::FORMATS[:zip]
+        type = 'application/zip'
+      when Package::FORMATS[:targz]
+        type = 'application/x-gtar'
+      else
+        head :not_found
+        return
+    end
 
-    #send_file 'aaa', :type => 'application/zip'
-    #head :multiple_choices, :location => [ "#{image_path}.tar" ]  
+    send_file "#{Rails.root}/#{@package.file}", :type => type
   end
 end

@@ -1,11 +1,12 @@
 require 'commands/base_command'
+require 'definitions_helper'
 
 class RemoveImageCommand
   include BaseCommand
   include DefinitionsHelper
 
   def initialize( image )
-    @image      = image
+    @image = image
     @definition = Definition.find( @image.definition_id )
   end
 
@@ -39,10 +40,10 @@ class RemoveImageCommand
     if $?.to_i != 0
       @image.status = Image::STATUSES[:error]
       logger.error "An error occured while building image with id = #{@image.id}. Check logs for more info."
+      @image.save!
     else
       logger.info "Image with id = #{@image.id} was successfully removed."
-    end
-
-    Image.destroy( @image.id )
+      Image.destroy( @image.id )
+    end 
   end
 end

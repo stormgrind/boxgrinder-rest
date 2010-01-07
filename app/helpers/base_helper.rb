@@ -46,13 +46,12 @@ module BaseHelper
       ActiveRecord::Base.transaction do
         o.save!
       end
+
+      logger.info "#{o.class} saved (id = #{o.id})."
+      return true
     rescue => e
       render_error( Error.new("Could not create new #{o.class}.", e) )
       return false
     end
-
-    logger.info "#{o.class} saved (id = #{o.id})."
-
-    true
   end
 end

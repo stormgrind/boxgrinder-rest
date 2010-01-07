@@ -9,11 +9,6 @@ Every API call return data in various output formats. To select a output format 
   <li><code>.yaml</code> or HTTP Header: <code>Accept: text/yaml</code></li>
   <li><code>.xml</code> or HTTP Header: <code>Accept: text/xml</code></li>
   <li><code>.json</code> or HTTP Header: <code>Accept: application/json</code></li>
-  <% if controller.controller_name.eql?('packages') %>
-      <li><code>.zip</code> or HTTP Header: <code>Accept: application/zip</code></li>
-      <li><code>.tar</code> or HTTP Header: <code>Accept: application/x-tar</code></li>
-      <li><code>.tgz</code> or HTTP Header: <code>Accept: application/x-gtar</code></li>
-  <% end %>
 </ul>
 
 <%= yield %>

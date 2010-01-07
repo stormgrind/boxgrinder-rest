@@ -27,10 +27,13 @@ module ImagesHelper
   end
 
   def load_image
-    id = params[:id]
+    id = nil
 
-    if id.nil? or !id.match(/\d+/)
-      render_error(Error.new( "Invalid image id provided: #{id}" ))
+    id = params[:id] if image_id_valid?(params[:id])
+    id = params[:image_id] if image_id_valid?(params[:image_id])
+
+    if id.nil?
+      render_error(Error.new( "Invalid image id provided." ))
       return false
     end
 
@@ -43,5 +46,10 @@ module ImagesHelper
       render_error( Error.new( "Unexpected error while retrieving image with id = #{id}.", e ))
     end
     false
+  end
+
+  def image_id_valid?( id )
+    return false if id.nil? or !id.match(/\d+/)
+    true
   end
 end

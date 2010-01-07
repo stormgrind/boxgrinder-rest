@@ -1,9 +1,8 @@
 class Definition < ActiveRecord::Base
   ACTIONS = { :create => 'CREATE', :destroy => 'DESTROY' }
-  STATUSES = { :new => 'NEW', :created => 'CREATED', :error => 'ERROR', :removed => 'REMOVED'}
+  STATUSES = { :new => 'NEW', :created => 'CREATED', :error => 'ERROR', :removed => 'REMOVED', :removing => 'REMOVING'}
 
-  validates_presence_of :name, :status, :description
-
+  validates_presence_of :name, :status, :description, :file
   has_many :images
 
   def initialize(attributes = nil)

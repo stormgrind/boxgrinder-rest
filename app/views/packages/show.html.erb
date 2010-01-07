@@ -3,12 +3,17 @@
 <table cellspacing="1" cellpadding="5">
   <tr class="row">
     <td>ID</td>
-    <td><%= @package.id %>
+    <td><%= link_to "Package #{@package.id}", :id => @package.id, :action => :show, :controller => 'packages' %>
     </td>
   </tr>
   <tr class="row">
     <td>Status</td>
     <td><%= @package.status %>
+    </td>
+  </tr>
+  <tr class="row">
+    <td>Format</td>
+    <td><%= @package.package_format %>
     </td>
   </tr>
   <tr class="row">
@@ -32,3 +37,17 @@
     </td>
   </tr>
 </table>
+
+<% unless is_package_in_progress? %>
+    <h4>Available actions</h4>
+    <ul>
+      <% unless is_package_status?(:error) %>
+          <% if is_package_status?(:built) %>
+              <li><%= link_to "Download", { :controller => 'packages', :action => :download, :id => @package.id } %> </li>
+          <% end %>
+          <% unless is_package_status?(:building) %>
+              <li><%= link_to "Destroy", { :action => :destroy, :id => @package.id }, :method => :delete, :confirm => "Are you sure?" %> </li>
+          <% end %>
+      <% end %>
+    </ul>
+<% end %>

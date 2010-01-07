@@ -4,6 +4,7 @@ class CreatePackages < ActiveRecord::Migration
       t.references :image, :null => false
       t.string :description, :limit => 1000, :null => false
       t.string :status, :null => false
+      t.string :file, :limit => 200, :null => false
       t.string :package_format, :limit => 50, :null => false
       t.timestamps
     end

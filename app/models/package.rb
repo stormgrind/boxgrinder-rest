@@ -1,8 +1,9 @@
 class Package < ActiveRecord::Base
   FORMATS = { :zip => 'ZIP', :tar => 'TAR', :targz => 'TARGZ' }
-  ACTIONS = { :build => 'BUILD', :destroy => 'DESTROY' }
-  STATUSES = { :new => 'NEW', :creating => 'CREATING', :created => 'CREATED', :error => 'ERROR' }
+  ACTIONS = { :build => 'BUILD', :remove => 'REMOVE' }
+  STATUSES = { :new => 'NEW', :building => 'BUILDING', :built => 'BUILT', :error => 'ERROR', :removing => 'REMOVING' }
 
+  validates_presence_of :status, :description, :file, :package_format
   belongs_to :image
 
   def initialize(attributes = nil)
