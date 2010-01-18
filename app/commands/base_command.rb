@@ -8,6 +8,10 @@ module BaseCommand
     Rails.logger
   end
 
+  def log
+    logger
+  end
+
   def execute_command( command )
     logger.debug "Executing command: '#{command}'"
 

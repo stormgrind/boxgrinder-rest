@@ -45,9 +45,9 @@
           <% if is_package_status?(:built) %>
               <li><%= link_to "Download", { :controller => 'packages', :action => :download, :id => @package.id } %> </li>
           <% end %>
-          <% unless is_package_status?(:building) %>
-              <li><%= link_to "Destroy", { :action => :destroy, :id => @package.id }, :method => :delete, :confirm => "Are you sure?" %> </li>
-          <% end %>
+      <% end %>
+      <% unless is_package_status?(:building) %>
+          <li><%= link_to "Destroy", { :action => :destroy, :id => @package.id }, :method => :delete, :confirm => "Are you sure?" %> </li>
       <% end %>
     </ul>
 <% end %>

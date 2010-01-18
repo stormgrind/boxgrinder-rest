@@ -5,6 +5,7 @@ require 'commands/build_image_command'
 require 'commands/remove_image_command'
 require 'commands/remove_definition_command'
 require 'commands/build_package_command'
+require 'commands/remove_package_command'
 
 module BoxGrinder
   class ActionQueue
@@ -82,6 +83,8 @@ module BoxGrinder
       case @task.action
         when Package::ACTIONS[:build] then
           BuildPackageCommand.new( package ).execute
+        when Package::ACTIONS[:remove] then
+          RemovePackageCommand.new( package ).execute
       end
 
     end

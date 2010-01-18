@@ -27,9 +27,9 @@ class PackagesController < BaseController
 
   def create
     if Package::FORMATS.values.include?( params[:package_format].upcase )
-      package_format = params[:package_format].upcase
+      @package_format = params[:package_format].upcase
     elsif params[:package_format].nil?
-      package_format = Package::FORMATS[:zip]
+      @package_format = Package::FORMATS[:zip]
     else
       render_error( Error.new("Specified package format '#{params[:package_format]}' is not valid. Valid formats: #{Package::FORMATS.values.join(", ")}") )
       return
@@ -38,7 +38,7 @@ class PackagesController < BaseController
     @package = Package.last(
             :conditions => {
                     :image_id => @image.id,
-                    :package_format => package_format
+                    :package_format => @package_format
             }
     )
 
@@ -53,21 +53,11 @@ class PackagesController < BaseController
         return
       end
 
-      case image.image_format
-        when Image::FORMATS[:raw]
-          package_file = appliance_config.path.file.package.raw
-        when Image::FORMATS[:vmware]
-          package_file = appliance_config.path.file.package.vmware
-        else
-          render_error( Error.new("No known image format: #{image.image_format} selected to package.") )
-          return
-      end
-
       @package = Package.new(
               :image_id => @image.id,
-              :package_format => package_format,
-              :file => package_file,
-              :description => "Package for image id = #{@image.id} in  #{@image.image_format} format. Selected package format: #{package_format}"
+              :package_format => @package_format,
+              :file => appliance_config.path.file.package[image.image_format.downcase.to_sym][@package_format.downcase.to_sym],
+              :description => "Package for image id = #{@image.id} in  #{@image.image_format} format. Selected package format: #{@package_format}"
       )
 
       return unless object_saved?( @package )
@@ -98,8 +88,8 @@ class PackagesController < BaseController
     case @package.package_format
       when Package::FORMATS[:zip]
         type = 'application/zip'
-      when Package::FORMATS[:targz]
-        type = 'application/x-gtar'
+      when Package::FORMATS[:tgz]
+        type = 'application/x-compressed'
       else
         head :not_found
         return

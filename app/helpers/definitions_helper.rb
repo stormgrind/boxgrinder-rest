@@ -49,7 +49,7 @@ module DefinitionsHelper
     appliance_config = BoxGrinder::ApplianceConfigHelper.new( appliance_definitions ).merge( BoxGrinder::ApplianceConfig.new( { :definition => appliance_definition_yaml, :file => appliance_definition_file } ) )
     BoxGrinder::ApplianceDefinitionValidator.new( appliance_definition_yaml, appliance_definition_file ).validate
 
-    appliance_config
+    appliance_config.initialize_paths
   end
 
   def read_appliance_definition(appliance_definition_file, appliance_definitions)

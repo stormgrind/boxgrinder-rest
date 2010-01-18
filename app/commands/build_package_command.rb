@@ -13,8 +13,10 @@ class BuildPackageCommand
     logger.info "Building #{@package.package_format.upcase} package for #{@image.image_format} image with id = #{@package.image_id}..."
 
     case @package.package_format
-      when Package::FORMATS[:targz] then
-        command = "appliance:#{@definition.name}:package:#{@image.image_format.downcase}:targz"
+      when Package::FORMATS[:tgz] then
+        command = "appliance:#{@definition.name}:package:#{@image.image_format.downcase}:tgz"
+      when Package::FORMATS[:zip] then
+        command = "appliance:#{@definition.name}:package:#{@image.image_format.downcase}:zip"
       else
         logger.fatal "Not valid format: #{@package.package_format}. It should never happen!"
         return

@@ -1,5 +1,5 @@
 class Package < ActiveRecord::Base
-  FORMATS = { :zip => 'ZIP', :tar => 'TAR', :targz => 'TARGZ' }
+  FORMATS = { :zip => 'ZIP', :tgz => 'TGZ' }
   ACTIONS = { :build => 'BUILD', :remove => 'REMOVE' }
   STATUSES = { :new => 'NEW', :building => 'BUILDING', :built => 'BUILT', :error => 'ERROR', :removing => 'REMOVING' }
 
