@@ -9,23 +9,24 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20090928140620) do
+ActiveRecord::Schema.define(:version => 20100309142442) do
 
-  create_table "definitions", :force => true do |t|
-    t.string   "name",        :limit => 100,  :null => false
-    t.string   "description", :limit => 1000, :null => false
-    t.string   "status",      :limit => 50,   :null => false
-    t.string   "file",        :limit => 200,  :null => false
+  create_table "appliances", :force => true do |t|
+    t.string   "name",       :limit => 100,   :null => false
+    t.string   "status",     :limit => 20,    :null => false
+    t.string   "summary",    :limit => 500,   :null => false
+    t.string   "config",     :limit => 10000, :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
   create_table "images", :force => true do |t|
-    t.integer  "definition_id",                 :null => false
-    t.string   "name",          :limit => 50
-    t.string   "description",   :limit => 1000, :null => false
-    t.string   "status",        :limit => 20,   :null => false
-    t.string   "image_format",  :limit => 20,   :null => false
+    t.integer  "appliance_id",                 :null => false
+    t.string   "name",         :limit => 50
+    t.string   "description",  :limit => 1000, :null => false
+    t.string   "status",       :limit => 20,   :null => false
+    t.string   "image_format", :limit => 20,   :null => false
+    t.string   "arch",         :limit => 10,   :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -34,7 +35,6 @@ ActiveRecord::Schema.define(:version => 20090928140620) do
     t.integer  "image_id",                       :null => false
     t.string   "description",    :limit => 1000, :null => false
     t.string   "status",                         :null => false
-    t.string   "file",           :limit => 200,  :null => false
     t.string   "package_format", :limit => 50,   :null => false
     t.datetime "created_at"
     t.datetime "updated_at"

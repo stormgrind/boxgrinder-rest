@@ -1,0 +1,11 @@
+/queues/boxgrinder/manage/image:
+/queues/boxgrinder/manage/package:
+/queues/boxgrinder/manage/node:
+
+/queues/boxgrinder/fedora/12/x86_64/appliance:
+/queues/boxgrinder/fedora/12/x86_64/image:
+/queues/boxgrinder/fedora/12/x86_64/package:
+
+/queues/boxgrinder/fedora/12/i386/appliance:
+/queues/boxgrinder/fedora/12/i386/image:
+/queues/boxgrinder/fedora/12/i386/package:

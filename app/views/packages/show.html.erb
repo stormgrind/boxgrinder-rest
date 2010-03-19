@@ -43,7 +43,8 @@
     <ul>
       <% unless is_package_status?(:error) %>
           <% if is_package_status?(:built) %>
-              <li><%= link_to "Download", { :controller => 'packages', :action => :download, :id => @package.id } %> </li>
+              <li>Download</li>
+              <!--<li><%= link_to "Download", { :controller => 'packages', :action => :download, :id => @package.id } %> </li>-->
           <% end %>
       <% end %>
       <% unless is_package_status?(:building) %>

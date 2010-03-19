@@ -1,3 +1,5 @@
+require 'torquebox-messaging-client'
+
 module BaseHelper
   include Defaults
   include ConversionHelper
@@ -35,6 +37,31 @@ module BaseHelper
     end
   end
 
+  def load_object
+    klass = eval(self.class.to_s.scan(/^(.*)sController/).to_s)
+    id    = params[:id] if id_valid?(params[:id])
+
+    if id.nil? or !id.match(/\d+/)
+      render_error(Error.new( "Invalid #{klass} id provided: #{id}" ))
+      return false
+    end
+
+    begin
+      instance_variable_set("@#{klass.to_s.downcase}", klass.find( id ))
+      return true
+    rescue ActiveRecord::RecordNotFound => e
+      render_error(Error.new( "#{klass} with id = #{id} not found.", e ))
+    rescue => e
+      render_error( Error.new( "Unexpected error while retrieving #{klass} with id = #{id}.", e ))
+    end
+    false
+  end
+
+  def id_valid?( id )
+    return false if id.nil? or !id.match(/\d+/)
+    true
+  end
+
   def object_saved?(o)
     if o.id.nil?
       logger.info "Creating new #{o.class}..."
@@ -53,5 +80,13 @@ module BaseHelper
       render_error( Error.new("Could not create new #{o.class}.", e) )
       return false
     end
+  end
+
+  def enqueue_task( queue_name, task )
+    logger.info "Putting new task into queue '#{queue_name}' for action '#{task.action}'."
+
+    TorqueBox::Messaging::Client.connect { |client| client.send( queue_name, :object =>  task ) }
+
+    logger.info "Task put into queue."
   end
 end

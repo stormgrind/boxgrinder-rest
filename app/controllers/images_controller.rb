@@ -1,14 +1,11 @@
-require 'queues/box_grinder/action_queue' unless RAILS_ENV=='test'
-require 'torquebox/queues'
-require 'base64'
+require 'boxgrinder-core/models/task'
 
 class ImagesController < BaseController
   include ImagesHelper
 
-  before_filter :load_image, :except => [ :create, :index ]
-  before_filter :validate_image, :only => [ :convert ]
-
   layout 'actions'
+
+  before_filter :load_image, :except => [ :create, :index ]
 
   def index
     @images = Image.all
@@ -21,11 +18,17 @@ class ImagesController < BaseController
   end
 
   def create
-    param_definition_id = params[:definition_id] || nil
-    param_image_format = params[:image_format] || nil
+    param_appliance_id  = params[:appliance_id]  || nil
+    param_image_format  = params[:image_format]  || nil
+    param_arch          = params[:arch]          || nil
 
-    if param_definition_id.nil? or !param_definition_id.match(/\d+/)
-      render_error( Error.new( "No or not valid definition_id parameter specified." ) )
+    if param_appliance_id.nil? or !param_appliance_id.match(/\d+/)
+      render_error( Error.new( "No or invalid 'appliance_id' parameter specified." ) )
+      return
+    end
+
+    if param_arch.nil? or !BoxGrinder::SUPPORTED_ARCHES.include?(param_arch)
+      render_error( Error.new( "No or invalid 'arch' parameter specified. Valid parameters are: #{BoxGrinder::SUPPORTED_ARCHES.join(", ")}." ) )
       return
     end
 
@@ -43,89 +46,41 @@ class ImagesController < BaseController
     # 1.check if there is already a built image
     @image = Image.last(
             :conditions => {
-                    :definition_id => param_definition_id,
-                    :image_format => image_format
+                    :appliance_id   => param_appliance_id,
+                    :image_format   => image_format
             }
     )
 
     if @image.nil?
+      begin
+        appliance         = Appliance.find( param_appliance_id )
+        appliance_config  = YAML.load( appliance.config )
+      rescue => e
+        render_error( Error.new("Something went wrong, check logs for more info.", e) )
+        return
+      end
+
+      if appliance.status != Appliance::STATUSES[:created]
+        render_error( Error.new( "Appliance '#{appliance.name}' is in invalid status (#{appliance.status}). Image can be built only for appliances in status #{Appliance::STATUSES[:created]}."))
+        return
+      end
 
       @image = Image.new(
-              :definition_id => param_definition_id,
-              :image_format => image_format,
-              :description => "Image for definition id = #{param_definition_id} and #{image_format} format."
+              :appliance_id     => appliance.id,
+              :image_format     => image_format,
+              :arch             => param_arch,
+              :description      => "Image for appliance '#{appliance.name}' (id = #{appliance.id}), #{image_format} format and #{param_arch} architecture."
       )
 
       return unless object_saved?( @image )
 
-      TorqueBox::Queues.enqueue( 'BoxGrinder::ActionQueue', :execute,
-                                 Base64.encode64(
-                                         { :task => Task.new(
-                                                 :artifact => ARTIFACTS[:image],
-                                                 :artifact_id => @image.id,
-                                                 :action => Image::ACTIONS[:build],
-                                                 :description => "Creating image from definition with id = #{param_definition_id}." )
-                                         }.to_yaml)
+      enqueue_task( "/queues/boxgrinder/#{appliance_config.os.name}/#{appliance_config.os.version}/#{param_arch}/image",
+                    BoxGrinder::Task.new( :build, "Creating image from appliance '#{appliance.name}' (id = #{appliance.id}), #{image_format} format and #{param_arch} architecture.", {
+                            :appliance_config   => appliance_config,
+                            :format             => @image.image_format,
+                            :image_id           => @image.id
+                    })
       )
-
-      logger.info "New task put into queue for #{ARTIFACTS[:image]} artifact, artifact_id #{@image.id} and action #{Image::ACTIONS[:build]}."
-    end
-
-    render_general( @image, 'images/show' )
-  end
-
-  # convert image to specified type
-  def convert
-    param_image_format = params[:image_format] || nil
-
-    # if there is no format specified
-    if (param_image_format.nil? or !Image::FORMATS.values.include?( param_image_format.upcase ))
-      render_error( Error.new( "Invalid or no image_format parameter specified for converting image id = #{@image.id}}"))
-      return
-    end
-
-    # if image format is not RAW
-    #unless is_image_format?( :raw )
-    #  render_error( Error.new( "Only RAW images can be converted, this image is in #{@image.image_format} format."))
-    #  return
-    #end
-
-    # if is in desired format
-    if is_image_format?( param_image_format.downcase.to_sym )
-      render_general( @image, 'images/show' )
-      return
-    end
-
-    image = Image.last(
-            :conditions => {
-                    :definition_id => @image.definition_id,
-                    :image_format => param_image_format.upcase
-            }
-    )
-
-    if image.nil?
-
-      @image = Image.new(
-              :definition_id => @image.definition_id,
-              :image_format => param_image_format.upcase,
-              :description => "Image for definition id = #{@image.definition_id} and #{param_image_format.upcase} format."
-      )
-
-      return unless object_saved?( @image )
-
-      TorqueBox::Queues.enqueue( 'BoxGrinder::ActionQueue', :execute,
-                                 Base64.encode64(
-                                         {:task => Task.new(
-                                                 :artifact => ARTIFACTS[:image],
-                                                 :artifact_id => @image.id,
-                                                 :action => Image::ACTIONS[:build],
-                                                 :description => "Converting image with id = #{@image.id} to format #{param_image_format.upcase}."),
-                                          :format => param_image_format.upcase
-                                         }.to_yaml)
-      )
-
-    else
-      @image = image
     end
 
     render_general( @image, 'images/show' )
@@ -139,19 +94,14 @@ class ImagesController < BaseController
 
     logger.info "Removing image with id = #{@image.id}..."
 
-    @image.status = Image::STATUSES[:removing]
+    begin
+      @image.destroy
+    rescue => e
+      render_error( Error.new( "An error occurred while destroying image. See logs for more info.", e))
+      return
+    end
 
-    return unless object_saved?( @image )
-
-    TorqueBox::Queues.enqueue( 'BoxGrinder::ActionQueue', :execute,
-                               Base64.encode64(
-                                       { :task => Task.new(
-                                               :artifact => ARTIFACTS[:image],
-                                               :artifact_id => @image.id,
-                                               :action => Image::ACTIONS[:remove],
-                                               :description => "Removing image with id = #{@image.id}.")
-                                       }.to_yaml)
-    )
+    logger.info "Image with id = #{@image.id} removed."
 
     redirect_to images_path
   end

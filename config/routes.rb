@@ -41,8 +41,8 @@ ActionController::Routing::Routes.draw do |map|
 
   #map.connect 'tasks/status/:status.:format', :path_prefix => 'api', :controller => 'tasks', :action => 'index', :conditions => { :method => :get }, :requirements => { :id => /\d+/ }
 
+  map.resources :appliances, :path_prefix => 'api', :except => [:edit, :new], :requirements => { :id => /\d+/ }
   map.resources :images, :path_prefix => 'api', :except => [:update, :edit, :new], :requirements => { :id => /\d+/ }
-  map.resources :definitions, :path_prefix => 'api', :except => [:update, :edit, :new], :requirements => { :id => /\d+/ }
   map.resources :packages, :path_prefix => 'api', :except => [:update, :edit, :new], :member => { :download => :get }, :requirements => { :id => /\d+/ }
 
 

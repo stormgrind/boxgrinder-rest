@@ -3,7 +3,7 @@ class Package < ActiveRecord::Base
   ACTIONS = { :build => 'BUILD', :remove => 'REMOVE' }
   STATUSES = { :new => 'NEW', :building => 'BUILDING', :built => 'BUILT', :error => 'ERROR', :removing => 'REMOVING' }
 
-  validates_presence_of :status, :description, :file, :package_format
+  validates_presence_of :status, :description, :package_format
   belongs_to :image
 
   def initialize(attributes = nil)

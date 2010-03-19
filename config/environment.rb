@@ -23,6 +23,7 @@ Rails::Initializer.run do |config|
   config.gem "torquebox-gem"
   config.gem "activerecord-jdbc-adapter", :lib=>'jdbc_adapter'
   config.gem "torquebox-rails"
+  config.gem "boxgrinder-core"
 
   # Only load the plugins named here, in the order given (default is alphabetical).
   # :all can be used as a placeholder for all plugins not explicitly named

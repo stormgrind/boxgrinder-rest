@@ -17,9 +17,9 @@ module ActiveSupport
       }[severity] || "U"
 
       message = "[%s:\t%s #%d] %s" % [level,
-                                     Time.now.strftime("%m%d %H:%M:%S"),
-                                     $$,
-                                     message]
+                                      Time.now.strftime("%m%d %H:%M:%S"),
+                                      $$,
+                                      message]
 
       message = "#{message}\n" unless message[-1] == ?\n
       buffer << message

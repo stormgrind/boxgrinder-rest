@@ -12,8 +12,8 @@
     </td>
   </tr>
   <tr class="row">
-    <td>Definition</td>
-    <td><%= link_to "Definition #{@image.definition_id}", :id => @image.definition_id, :action => :show, :controller => 'definitions' %>
+    <td>Appliance</td>
+    <td><%= link_to @image.appliance.name, :id => @image.appliance_id, :action => :show, :controller => 'appliances' %>
     </td>
   </tr>
   <tr class="row">
@@ -43,13 +43,8 @@
     <ul>
       <% unless is_image_status?(:error) %>
           <% if is_image_status?(:built) %>
-
-              <li><%= link_to "Build RAW image", { :action => :create, :controller => 'images', :definition_id => @image.definition.id, :image_format => Image::FORMATS[:raw] }, :method => :post %></li>
-              <li><%= link_to "Build VMware image", { :action => :create, :controller => 'images', :definition_id => @image.definition.id, :image_format => Image::FORMATS[:vmware] }, :method => :post %></li>
-              <li><%= link_to "Build EC2 image", { :action => :create, :controller => 'images', :definition_id => @image.definition.id, :image_format => Image::FORMATS[:ec2] }, :method => :post %></li>
-
-              <li><%= link_to "Package to zip", { :controller => 'packages', :package_format => 'zip', :id => @image.id }, :method => :create %> </li>
-              <li><%= link_to "Package to tgz", { :controller => 'packages', :package_format => 'tgz', :id => @image.id }, :method => :create %> </li>
+              <li><%= link_to "Package to zip", { :controller => 'packages', :package_format => 'zip', :image_id => @image.id }, :method => :create %> </li>
+              <li><%= link_to "Package to tgz", { :controller => 'packages', :package_format => 'tgz', :image_id => @image.id }, :method => :create %> </li>
           <% end %>
       <% end %>
       <% unless is_image_status?(:building) %>

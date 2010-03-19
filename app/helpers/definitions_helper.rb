@@ -1,6 +1,5 @@
-require 'boxgrinder/validator/appliance-definition-validator'
-require 'boxgrinder/config'
-require 'boxgrinder/helpers/appliance-config-helper'
+#require 'boxgrinder/validators/appliance-definition-validator'
+#require 'boxgrinder/helpers/appliance-config-helper'
 
 module DefinitionsHelper
   include BaseHelper
@@ -57,36 +56,5 @@ module DefinitionsHelper
     appliance_definitions[appliance_definition['name']] = { :definition => appliance_definition, :file => appliance_definition_file }
   end
 
-  def validate_definition_file
-    msg = nil
-    exception = nil
-    definition_file = params[:definition]
-
-    if definition_file.nil?
-      render_error( Error.new( "No definition parameter specified in your request." ) )
-      return
-    end
-
-    definition_content = params[:definition].read
-
-    unless definition_file.content_type.eql?("application/octet-stream")
-      render_error( Error.new( "Invalid content type, application/octet-stream expected." ) )
-      return
-    end
-
-    begin
-      definition_yaml = YAML.load( definition_content )
-    rescue => e
-      render_error( Error.new( "Not a valid YAML file", e) )
-      return
-    end
-
-    if definition_yaml.nil?
-      render_error( Error.new( "Not a valid YAML file", e) )
-      return
-    end
-
-    @definition_content = definition_content
-    @definition_yaml = definition_yaml
-  end
+  
 end

@@ -1,9 +1,7 @@
 require 'rbconfig'
-require 'definitions_helper'
 
 module PackagesHelper
   include BaseHelper
-  include DefinitionsHelper
 
   private
 
