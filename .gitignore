@@ -10,4 +10,5 @@ rpms-cache
 build
 appliances
 boxgrinder.log
+config/boxgrinder.yml
 
