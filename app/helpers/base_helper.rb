@@ -82,10 +82,10 @@ module BaseHelper
     end
   end
 
-  def enqueue_task( queue_name, task )
+  def enqueue_task( queue_name, task, properties = {} )
     logger.info "Putting new task into queue '#{queue_name}' for action '#{task.action}'."
 
-    TorqueBox::Messaging::Client.connect { |client| client.send( queue_name, :object =>  task ) }
+    TorqueBox::Messaging::Client.connect { |client| client.send( queue_name, :object => task, :properties => properties ) }
 
     logger.info "Task put into queue."
   end

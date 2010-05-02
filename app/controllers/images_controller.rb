@@ -82,12 +82,12 @@ class ImagesController < BaseController
 
       return unless object_saved?(@image)
 
-      enqueue_task("/queues/boxgrinder/#{appliance_config.os.name}/#{appliance_config.os.version}/#{param_arch}/image",
+      enqueue_task("/queues/boxgrinder/image",
                    BoxGrinder::Task.new(:build, @image.description, {
                            :appliance_config   => appliance_config,
                            :platform           => @image.platform,
                            :image_id           => @image.id
-                   })
+                   }), :os_name => appliance_config.os.name, :os_version => appliance_config.os.version, :arch => param_arch
       )
     end
 
