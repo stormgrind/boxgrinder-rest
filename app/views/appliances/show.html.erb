@@ -1,0 +1,62 @@
+<h3>Appliance <%= @appliance.id %></h3>
+
+<table cellspacing="1" cellpadding="5">
+  <tr class="row">
+    <td>ID</td>
+    <td><%= @appliance.id %>
+    </td>
+  </tr>
+  <tr class="row">
+    <td>Name</td>
+    <td>
+      <%= @appliance.name %>
+    </td>
+  </tr>
+  <tr class="row">
+    <td>Status</td>
+    <td>
+      <%= @appliance.status %>
+    </td>
+  </tr>
+  <tr class="row">
+    <td>Summary</td>
+    <td>
+      <%= @appliance.summary %>
+    </td>
+  </tr>
+  <tr class="row">
+    <td>Config</td>
+    <td>
+      <pre><%= @appliance.config %></pre>
+    </td>
+  </tr>
+  <tr class="row">
+    <td>Created</td>
+    <td><%= @appliance.created_at %>
+    </td>
+  </tr>
+  <tr class="row">
+    <td>Modified</td>
+    <td><%= @appliance.updated_at %>
+    </td>
+  </tr>
+</table>
+
+<h4>Build appliance actions</h4>
+
+<ul>
+  <% if is_appliance_status?(:created) %>
+      <% for arch in BoxGrinder::RESTConfig.instance.architectures %>
+          <li><strong><%= arch %> architecture</strong>
+            <ul>
+              <li><%= link_to "Build base image", {:action => :create, :controller => 'images', :appliance_id => @appliance.id, :arch => arch}, :method => :post %></li>
+              
+              <% BoxGrinder::RESTConfig.instance.plugins[:platform].each do |platform| %>
+                  <li><%= link_to "Build #{platform} image", {:action => :create, :controller => 'images', :appliance_id => @appliance.id, :platform => platform, :arch => arch}, :method => :post %></li>
+              <% end %>
+            </ul>
+          </li>
+      <% end %>
+  <% end %>
+  <li><%= link_to "Destroy", {:action => :destroy, :id => @appliance.id}, :method => :delete, :confirm => "Are you sure?" %> </li>
+</ul>
