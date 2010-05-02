@@ -39,7 +39,11 @@ class DefinitionsController < ApplicationController
 
 
     @definition             = Definition.new
+
+    puts @definition
+
     @definition.content     = @definition_yaml
+    @definition.type        = :yaml
     #= File.join(Rails.root, "appliances", @definition.name + '.appl')
 
     @appliance = Appliance.new

@@ -17,8 +17,8 @@
     </td>
   </tr>
   <tr class="row">
-    <td>Format</td>
-    <td><%= @image.image_format %>
+    <td>Platform</td>
+    <td><%= @image.platform.nil? ? "Base image" : @image.platform %>
     </td>
   </tr>
   <tr class="row">
@@ -43,12 +43,13 @@
     <ul>
       <% unless is_image_status?(:error) %>
           <% if is_image_status?(:built) %>
-              <li><%= link_to "Package to zip", { :controller => 'packages', :package_format => 'zip', :image_id => @image.id }, :method => :create %> </li>
-              <li><%= link_to "Package to tgz", { :controller => 'packages', :package_format => 'tgz', :image_id => @image.id }, :method => :create %> </li>
+              <% BoxGrinder::RESTConfig.instance.plugins[:delivery].each do |delivery| %>
+                  <li><%= link_to "Deliver using #{delivery}", {:action => :deliver, :controller => 'images', :id => @image.id, :platform => @image.platform, :type => delivery}, :method => :post %></li>
+              <% end %>
           <% end %>
       <% end %>
       <% unless is_image_status?(:building) %>
-          <li><%= link_to "Destroy", { :action => :destroy, :id => @image.id }, :method => :delete, :confirm => "Are you sure?" %> </li>
+          <li><%= link_to "Destroy", {:action => :destroy, :id => @image.id}, :method => :delete, :confirm => "Are you sure?" %> </li>
       <% end %>
     </ul>
 <% end %>

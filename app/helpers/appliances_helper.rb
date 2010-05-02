@@ -1,10 +1,31 @@
-require 'boxgrinder-core/validators/appliance-definition-validator'
+# JBoss, Home of Professional Open Source
+# Copyright 2009, Red Hat Middleware LLC, and individual contributors
+# by the @authors tag. See the copyright.txt in the distribution for a
+# full listing of individual contributors.
+#
+# This is free software; you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+#
+# This software is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this software; if not, write to the Free
+# Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+# 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+
+require 'boxgrinder-core/helpers/appliance-helper'
+require 'boxgrinder-core/validators/appliance-config-validator'
 
 module AppliancesHelper
   include BaseHelper
 
   def validate_appliance_definition_file
-    logger.debug "Validating appliance definition file..."
+    logger.debug "Reading appliance definition file..."
 
     definition_file = params[:definition]
 
@@ -13,29 +34,17 @@ module AppliancesHelper
       return
     end
 
-    definition_yaml = params[:definition].read
-
-    unless definition_file.content_type.eql?("application/octet-stream")
-      render_error( Error.new( "Invalid content type, application/octet-stream expected." ) )
-      return
-    end
-
     begin
-      definition = YAML.load( definition_yaml )
+      appliance_configs       = BoxGrinder::ApplianceHelper.new( :log => logger ).read_definitions( definition_file.path, definition_file.content_type )
+      appliance_config_helper = BoxGrinder::ApplianceConfigHelper.new( appliance_configs )
+
+      @appliance_config = appliance_config_helper.merge(appliance_configs.values.first.clone)
     rescue => e
-      render_error( Error.new( "Not a valid YAML file", e) )
+      render_error( Error.new( "Could not read definition file", e) )
       return
     end
 
-    if definition.nil?
-      render_error( Error.new( "Not a valid YAML file", e) )
-      return
-    end
-
-    BoxGrinder::ApplianceDefinitionValidator.new( definition ).validate
-
-    @appliance_definition_yaml  = definition_yaml
-    @appliance_definition       = definition
+    BoxGrinder::ApplianceConfigValidator.new( @appliance_config ).validate
 
     logger.debug "Appliance definition file is valid."
   end

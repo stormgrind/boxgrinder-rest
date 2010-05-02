@@ -5,7 +5,7 @@ class CreateImages < ActiveRecord::Migration
       t.string :name, :limit => 50
       t.string :description, :limit => 1000, :null => false
       t.string :status, :limit => 20, :null => false
-      t.string :image_format, :limit => 20, :null => false
+      t.string :platform, :limit => 20, :null => true
       t.string :arch, :limit => 10, :null => false
       t.timestamps
     end
