@@ -30,11 +30,13 @@
     <td><%= link_to @image.appliance.name, :id => @image.appliance_id, :action => :show, :controller => 'appliances' %>
     </td>
   </tr>
-  <tr class="row">
-    <td>Platform</td>
-    <td><%= @image.platform.nil? ? "Base image" : @image.platform %>
-    </td>
-  </tr>
+  <% unless @image.platform.nil? %>
+      <tr class="row">
+        <td>Platform</td>
+        <td><%= @image.platform %>
+        </td>
+      </tr>
+  <% end %>
   <tr class="row">
     <td>Description</td>
     <td><%= @image.description %>
@@ -69,7 +71,7 @@
           <% end %>
       <% end %>
       <% unless is_image_status?(:building) %>
-          <li><%= link_to "Destroy", {:action => :destroy, :id => @image.id}, :method => :delete, :confirm => "Are you sure?" %> </li>
+          <li><%= link_to "Destroy", {:action => :destroy, :id => @image.id}, :method => :delete, :confirm => "Are you sure? All dependent images will be removed too!" %> </li>
       <% end %>
     </ul>
 <% end %>
