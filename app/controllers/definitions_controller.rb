@@ -80,7 +80,7 @@ class DefinitionsController < ApplicationController
 
     return unless object_saved?( @definition )
 
-    TorqueBox::Queues.enqueue( 'BoxGrinder::ActionQueue', :execute,
+    TorqueBox::Queues.send( 'BoxGrinder::ActionQueue', :execute,
                                Base64.encode64(
                                        { :task => Task.new(
                                                :artifact => ARTIFACTS[:definition],

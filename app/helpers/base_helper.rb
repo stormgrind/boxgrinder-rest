@@ -9,7 +9,7 @@ module BaseHelper
   def render_error( error )
     @error = error
 
-    logger.error( @error.message, @error.exception )
+    logger.error( "#{@error.message}#$/#{@error.exception.backtrace.join($/)}" )
 
     respond_to do |format|
       format.html { render 'root/error' }

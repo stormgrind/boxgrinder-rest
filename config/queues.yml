@@ -1,4 +1,6 @@
 /queues/boxgrinder/manage/image:
 /queues/boxgrinder/manage/node:
 
-/queues/boxgrinder/image:
+/queues/boxgrinder/image/create:
+/queues/boxgrinder/image/convert:
+/queues/boxgrinder/image/deliver:

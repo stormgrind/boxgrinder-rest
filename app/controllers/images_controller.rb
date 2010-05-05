@@ -1,4 +1,5 @@
 require 'boxgrinder-core/models/task'
+require 'boxgrinder-core/helpers/queue-helper'
 
 class ImagesController < BaseController
   include ImagesHelper
@@ -25,20 +26,8 @@ class ImagesController < BaseController
     render_general(@image, 'images/show')
   end
 
-  def create
-    param_appliance_id  = params[:appliance_id] || nil
-    param_platform      = params[:platform] || nil
-    param_arch          = params[:arch] || nil
-
-    if param_appliance_id.nil? or !param_appliance_id.match(/\d+/)
-      render_error(Error.new("No or invalid 'appliance_id' parameter specified."))
-      return
-    end
-
-    if param_arch.nil? or !BoxGrinder::SUPPORTED_ARCHES.include?(param_arch)
-      render_error(Error.new("No or invalid 'arch' parameter specified. Valid parameters are: #{BoxGrinder::SUPPORTED_ARCHES.join(", ")}."))
-      return
-    end
+  def convert
+    param_platform = params[:platform] || nil
 
     platform = nil
 
@@ -51,11 +40,74 @@ class ImagesController < BaseController
       platform = param_platform.downcase
     end
 
+    image = Image.last(
+            :conditions => {
+                    :appliance_id   => @image.appliance.id,
+                    :platform       => platform
+            }
+    )
+
+    if image.nil?
+      image = Image.new(
+              :appliance        => @image.appliance,
+              :parent           => @image,
+              :arch             => @image.arch,
+              :platform         => platform,
+              :description      => "Image for #{@image.appliance.name} appliance, #{platform} platform and #{@image.arch} architecture."
+      )
+
+      return unless object_saved?(image)
+
+      BoxGrinder::QueueHelper.new( :log => logger ).client do |client|
+        client.send("/queues/boxgrinder/image/convert",
+                    :object => BoxGrinder::Task.new(
+                            :convert,
+                            image.description, {
+                                    :appliance_config   => YAML.load(@image.appliance.config),
+                                    :platform           => platform,
+                                    :image_id           => image.id
+                            }),
+                    :properties => { :node => @image.node }
+        )
+      end
+    end
+
+    @image = image
+
+    render_general(@image, 'images/show')
+  end
+
+  def create
+    param_appliance_id  = params[:appliance_id] || nil
+    #param_platform      = params[:platform]     || nil
+    param_arch          = params[:arch]         || nil
+
+    if param_appliance_id.nil? or !param_appliance_id.match(/\d+/)
+      render_error(Error.new("No or invalid 'appliance_id' parameter specified."))
+      return
+    end
+
+    if param_arch.nil? or !BoxGrinder::SUPPORTED_ARCHES.include?(param_arch)
+      render_error(Error.new("No or invalid 'arch' parameter specified. Valid parameters are: #{BoxGrinder::SUPPORTED_ARCHES.join(", ")}."))
+      return
+    end
+
+#    platform = nil
+#
+#    # image_format is optional, if no image_format parameter is specified; RAW format will be used
+#    unless param_platform.nil?
+#      unless BoxGrinder::RESTConfig.instance.plugins[:platform].include?(param_platform.downcase)
+#        render_error(Error.new("Invalid format specified. Available formats: #{BoxGrinder::RESTConfig.instance.plugins[:platform].sort.join(", ")}."))
+#        return
+#      end
+#      platform = param_platform.downcase
+#    end
+
     # 1.check if there is already a built image
     @image = Image.last(
             :conditions => {
                     :appliance_id   => param_appliance_id,
-                    :platform       => platform
+                    :platform       => nil
             }
     )
 
@@ -75,20 +127,27 @@ class ImagesController < BaseController
 
       @image = Image.new(
               :appliance_id     => appliance.id,
-              :platform         => platform,
               :arch             => param_arch,
-              :description      => "Image for #{appliance.name} appliance, #{param_arch} architecture#{platform.nil? ? '' : ", #{platform} platform"}."
+              :description      => "Base image for #{appliance.name} appliance and #{param_arch} architecture."
       )
 
       return unless object_saved?(@image)
 
-      enqueue_task("/queues/boxgrinder/image",
-                   BoxGrinder::Task.new(:build, @image.description, {
-                           :appliance_config   => appliance_config,
-                           :platform           => @image.platform,
-                           :image_id           => @image.id
-                   }), :os_name => appliance_config.os.name, :os_version => appliance_config.os.version, :arch => param_arch
-      )
+      BoxGrinder::QueueHelper.new( :log => logger ).client do |client|
+        client.send("/queues/boxgrinder/image/create",
+                    :object => BoxGrinder::Task.new(
+                            :create,
+                            @image.description, {
+                                    :appliance_config   => appliance_config,
+                                    :image_id           => @image.id
+                            }),
+                    :properties => {
+                            :os_name     => appliance_config.os.name,
+                            :os_version  => appliance_config.os.version,
+                            :arch        => param_arch
+                    }
+        )
+      end
     end
 
     render_general(@image, 'images/show')

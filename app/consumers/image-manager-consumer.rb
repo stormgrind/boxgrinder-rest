@@ -29,6 +29,7 @@ module BoxGrinder
 
         @image = Image.find( image[:id] )
         @image.status = Image::STATUSES[image[:status]]
+        @image.node = image[:node] unless image[:node].nil? 
         
         ActiveRecord::Base.transaction do
           @image.save!

@@ -46,4 +46,8 @@ Rails::Initializer.run do |config|
   # config.i18n.default_locale = :de
 
   #config.active_record.schema_format = :sql
+
+  require 'boxgrinder-core/helpers/log-helper'
+
+  config.logger = BoxGrinder::LogHelper.new( :type => :file, :location => "#{RAILS_ROOT}/log/boxgrinder.log" ) 
 end

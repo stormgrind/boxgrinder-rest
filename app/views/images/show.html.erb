@@ -6,11 +6,25 @@
     <td><%= link_to "Image #{@image.id}", :id => @image.id, :action => :show, :controller => 'images' %>
     </td>
   </tr>
+  <% unless @image.parent.nil? %>
+      <tr class="row">
+        <td>Node</td>
+        <td><%= link_to "Image #{@image.parent.id}", :id => @image.parent.id, :action => :show, :controller => 'images' %>
+        </td>
+      </tr>
+  <% end %>
   <tr class="row">
     <td>Status</td>
     <td><%= @image.status %>
     </td>
   </tr>
+  <% unless @image.node.nil? %>
+      <tr class="row">
+        <td>Node</td>
+        <td><%= @image.node %>
+        </td>
+      </tr>
+  <% end %>
   <tr class="row">
     <td>Appliance</td>
     <td><%= link_to @image.appliance.name, :id => @image.appliance_id, :action => :show, :controller => 'appliances' %>
@@ -43,8 +57,14 @@
     <ul>
       <% unless is_image_status?(:error) %>
           <% if is_image_status?(:built) %>
+              <% if @image.platform.nil? %>
+                  <% BoxGrinder::RESTConfig.instance.plugins[:platform].each do |platform| %>
+                      <li><%= link_to "Convert to #{platform}", {:action => :convert, :controller => 'images', :id => @image.id, :platform => platform}, :method => :post %></li>
+                  <% end %>
+              <% end %>
+
               <% BoxGrinder::RESTConfig.instance.plugins[:delivery].each do |delivery| %>
-                  <li><%= link_to "Deliver using #{delivery}", {:action => :deliver, :controller => 'images', :id => @image.id, :platform => @image.platform, :type => delivery}, :method => :post %></li>
+                  <li><%= link_to "Deliver using #{delivery}", {:action => :deliver, :controller => 'images', :id => @image.id, :type => delivery}, :method => :post %></li>
               <% end %>
           <% end %>
       <% end %>

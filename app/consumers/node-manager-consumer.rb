@@ -18,39 +18,47 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
+require 'torquebox-messaging-client'
+
 module BoxGrinder
   module REST
-    class ImageManagerConsumer
+    class NodeManagerConsumer
 
-      def on_object( payload )
+      def on_object(payload, message)
         @log = Rails.logger
+        @reply_to = message.jmsreply_to
 
-        @log.info "Received new management message for Node."
-
-        node = payload[:node]
+        if @reply_to.nil? or !payload.is_a?(Hash)
+          @log.error "Invalid data sent to register a node."
+          return
+        end
 
         case payload[:action]
-          when :register then
-            register_node( node )
-          when :deregister then
-            deregister_node( node )
+          when :register
+            register_node(payload[:node])
         end
-
-        @log.info "Message handled."
       end
 
-      def register_node( node )
-        @log.info "Registering node #{node[:address]} (arch = #{node[:arch]}, os = #{node[:os_name]} #{node[:os_version]})..."
+      def register_node(node_config)
+        @log.info "Registering new node..."
+        @log.debug "New node name: '#{node_config[:name]}'"
+
+        # TODO save this to database
+        # node_config[:address]
+        # node_config[:os_name]
+        # node_config[:os_version]
+        # node_config[:arch]
+
         begin
-
-          @log.info "Node #{node[:address]} registered."
-        rescue
-          @log.info "An error occurred while registering node #{node[:address]}."
+          TorqueBox::Messaging::Client.connect do |client|
+            client.send(@reply_to, :text => 'OK')
+          end
+          @log.info "New node registered."
+        rescue => e
+          @log.error e
+          @log.error e.backtrace.join($/)
+          @log.error "Couldn't register node '#{node_config[:name]}'."
         end
-      end
-
-      def deregister_node( node )
-
       end
     end
   end

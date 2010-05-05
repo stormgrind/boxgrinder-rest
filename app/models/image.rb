@@ -6,6 +6,7 @@ class Image < ActiveRecord::Base
   validates_presence_of :status, :description
   belongs_to :appliance
   has_one :package
+  belongs_to :parent, :class_name => "Image"
 
   def after_initialize
     if self.status.nil?

@@ -19,7 +19,7 @@ describe ImagesController do
   end
 
   it "should create a task to delete image with id = 1" do
-    ActionQueue.should_receive(:enqueue)
+    ActionQueue.should_receive(:send)
 
     Image.count.should == image_fixtures_size
     delete 'destroy', :id => 1
@@ -102,7 +102,7 @@ describe ImagesController do
   end
 
   it "should create a new image" do
-    ActionQueue.should_receive(:enqueue)
+    ActionQueue.should_receive(:send)
 
     Image.count.should == image_fixtures_size
     post 'create', :definition_id => 2
@@ -153,7 +153,7 @@ describe ImagesController do
   end
 
   it "should convert image to EC2 format" do
-    ActionQueue.should_receive(:enqueue)
+    ActionQueue.should_receive(:send)
 
     Image.count.should == image_fixtures_size
     post 'convert', :id => 4, :image_format => 'eC2'
