@@ -6,10 +6,15 @@
     <td><%= link_to "Image #{@image.id}", :id => @image.id, :action => :show, :controller => 'images' %>
     </td>
   </tr>
+  <tr class="row">
+    <td>Description</td>
+    <td><%= @image.description %>
+    </td>
+  </tr>
   <% unless @image.parent.nil? %>
       <tr class="row">
         <td>Parent</td>
-        <td><%= link_to "Image #{@image.parent.id}", :id => @image.parent.id, :action => :show, :controller => 'images' %>
+        <td><%= link_to "Image #{@image.parent.id}", @image.parent %>
         </td>
       </tr>
   <% end %>
@@ -21,13 +26,13 @@
   <% unless @image.node.nil? %>
       <tr class="row">
         <td>Node</td>
-        <td><%= @image.node %>
+        <td><%= link_to "Node #{@image.node.name}", @image.node %>
         </td>
       </tr>
   <% end %>
   <tr class="row">
     <td>Appliance</td>
-    <td><%= link_to @image.appliance.name, :id => @image.appliance_id, :action => :show, :controller => 'appliances' %>
+    <td><%= link_to @image.appliance.name, @image.appliance %>
     </td>
   </tr>
   <% unless @image.platform.nil? %>
@@ -37,11 +42,6 @@
         </td>
       </tr>
   <% end %>
-  <tr class="row">
-    <td>Description</td>
-    <td><%= @image.description %>
-    </td>
-  </tr>
   <tr class="row">
     <td>Created</td>
     <td><%= @image.created_at %>

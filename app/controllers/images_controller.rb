@@ -56,22 +56,28 @@ class ImagesController < BaseController
               :description      => "Image for #{@image.appliance.name} appliance, #{platform} platform and #{@image.arch} architecture."
       )
 
-      return unless object_saved?(image)
+      begin
+        ActiveRecord::Base.transaction do
+          return unless object_saved?(image)
 
-      puts YAML.load(@image.appliance.config)
+          BoxGrinder::QueueHelper.new( :log => logger ).client do |client|
+            client.send("/queues/boxgrinder/image/convert",
+                        :object => BoxGrinder::Task.new(
+                                :convert,
+                                image.description, {
+                                        :appliance_config   => YAML.load(@image.appliance.config),
+                                        :platform           => platform,
+                                        :image_id           => image.id
+                                }),
+                        :properties => { :node => @image.node.name }
+            )
 
-      BoxGrinder::QueueHelper.new( :log => logger ).client do |client|
-        client.send("/queues/boxgrinder/image/convert",
-                    :object => BoxGrinder::Task.new(
-                            :convert,
-                            image.description, {
-                                    :appliance_config   => YAML.load(@image.appliance.config),
-                                    :platform           => platform,
-                                    :image_id           => image.id
-                            }),
-                    :properties => { :node => @image.node }
-        )
+          end
+        end
+      rescue
+        @log.error "Couldn't send message to #{@image.node.name} node."
       end
+
     end
 
     @image = image
@@ -153,26 +159,25 @@ class ImagesController < BaseController
 
     to_remove = @image.images + [ @image ]
 
-    BoxGrinder::QueueHelper.new( :log => logger ).client do |client|
-      to_remove.each do |image|
-        puts image
-        puts "REMOVE"
-
-        client.send("/queues/boxgrinder/image/destroy",
-                    :object => BoxGrinder::Task.new(
-                            :destroy,
-                            "Removing image with id = #{image.id}", {
-                                    :appliance_config   => YAML.load(image.appliance.config),
-                                    :platform           => image.platform,
-                                    :image_id           => image.id
-                            }),
-                    :properties => { :node => image.node }
-        )
-      end
-    end
-
     begin
-      @image.destroy
+      ActiveRecord::Base.transaction do
+        BoxGrinder::QueueHelper.new( :log => logger ).client do |client|
+          to_remove.each do |image|
+            client.send("/queues/boxgrinder/image/destroy",
+                        :object => BoxGrinder::Task.new(
+                                :destroy,
+                                "Removing image with id = #{image.id}", {
+                                        :appliance_config   => YAML.load(image.appliance.config),
+                                        :platform           => image.platform,
+                                        :image_id           => image.id
+                                }),
+                        :properties => { :node => image.node.name }
+            ) unless image.node.nil?
+          end
+        end
+
+        @image.destroy
+      end
     rescue => e
       render_error(Error.new("An error occurred while destroying image. See logs for more info.", e))
       return

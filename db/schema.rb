@@ -22,11 +22,11 @@ ActiveRecord::Schema.define(:version => 20100506161613) do
 
   create_table "images", :force => true do |t|
     t.integer  "appliance_id",                 :null => false
+    t.integer  "node_id"
     t.integer  "parent_id"
     t.string   "name",         :limit => 50
     t.string   "description",  :limit => 1000, :null => false
     t.string   "status",       :limit => 20,   :null => false
-    t.string   "node",         :limit => 50
     t.string   "platform",     :limit => 20
     t.string   "arch",         :limit => 10,   :null => false
     t.datetime "created_at"

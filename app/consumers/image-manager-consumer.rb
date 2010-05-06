@@ -32,11 +32,23 @@ module BoxGrinder
           return
         end
 
+        #TODO: introduce actions
         begin
           @image = Image.find(image[:id])
-
           @image.status = Image::STATUSES[image[:status]]
-          @image.node   = image[:node] unless image[:node].nil?
+
+          node_name = image[:node]
+
+          unless node_name.nil?
+            node = Node.last( :conditions => { :name  => node_name } )
+
+            if node.nil?
+              @log.error "Node '#{node_name}' not found. Is node properly registered?"
+              @image.node = nil
+            else
+              @image.node = node
+            end
+          end
 
           ActiveRecord::Base.transaction do
             @image.save!
