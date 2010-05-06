@@ -8,7 +8,7 @@
   </tr>
   <% unless @image.parent.nil? %>
       <tr class="row">
-        <td>Node</td>
+        <td>Parent</td>
         <td><%= link_to "Image #{@image.parent.id}", :id => @image.parent.id, :action => :show, :controller => 'images' %>
         </td>
       </tr>

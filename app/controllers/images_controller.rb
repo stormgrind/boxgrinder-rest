@@ -1,4 +1,5 @@
 require 'boxgrinder-core/models/task'
+require 'boxgrinder-core/models/appliance-config'
 require 'boxgrinder-core/helpers/queue-helper'
 
 class ImagesController < BaseController
@@ -31,7 +32,6 @@ class ImagesController < BaseController
 
     platform = nil
 
-    # image_format is optional, if no image_format parameter is specified; RAW format will be used
     unless param_platform.nil?
       unless BoxGrinder::RESTConfig.instance.plugins[:platform].include?(param_platform.downcase)
         render_error(Error.new("Invalid format specified. Available formats: #{BoxGrinder::RESTConfig.instance.plugins[:platform].sort.join(", ")}."))
@@ -42,7 +42,7 @@ class ImagesController < BaseController
 
     image = Image.last(
             :conditions => {
-                    :appliance_id   => @image.appliance.id,
+                    :parent_id      => @image.id,
                     :platform       => platform
             }
     )
@@ -57,6 +57,8 @@ class ImagesController < BaseController
       )
 
       return unless object_saved?(image)
+
+      puts YAML.load(@image.appliance.config)
 
       BoxGrinder::QueueHelper.new( :log => logger ).client do |client|
         client.send("/queues/boxgrinder/image/convert",
@@ -79,7 +81,6 @@ class ImagesController < BaseController
 
   def create
     param_appliance_id  = params[:appliance_id] || nil
-    #param_platform      = params[:platform]     || nil
     param_arch          = params[:arch]         || nil
 
     if param_appliance_id.nil? or !param_appliance_id.match(/\d+/)
@@ -91,17 +92,6 @@ class ImagesController < BaseController
       render_error(Error.new("No or invalid 'arch' parameter specified. Valid parameters are: #{BoxGrinder::SUPPORTED_ARCHES.join(", ")}."))
       return
     end
-
-#    platform = nil
-#
-#    # image_format is optional, if no image_format parameter is specified; RAW format will be used
-#    unless param_platform.nil?
-#      unless BoxGrinder::RESTConfig.instance.plugins[:platform].include?(param_platform.downcase)
-#        render_error(Error.new("Invalid format specified. Available formats: #{BoxGrinder::RESTConfig.instance.plugins[:platform].sort.join(", ")}."))
-#        return
-#      end
-#      platform = param_platform.downcase
-#    end
 
     # 1.check if there is already a built image
     @image = Image.last(
@@ -121,7 +111,7 @@ class ImagesController < BaseController
       end
 
       if appliance.status != Appliance::STATUSES[:created]
-        render_error(Error.new("Appliance '#{appliance.name}' is in invalid status (#{appliance.status}). Image can be built only for appliances in status #{Appliance::STATUSES[:created]}."))
+        render_error(Error.new("Appliance '#{appliance.name}' has invalid status (#{appliance.status}). Image can be built only for appliances in status #{Appliance::STATUSES[:created]}."))
         return
       end
 
@@ -160,6 +150,26 @@ class ImagesController < BaseController
     end
 
     logger.info "Removing image with id = #{@image.id}..."
+
+    to_remove = @image.images + [ @image ]
+
+    BoxGrinder::QueueHelper.new( :log => logger ).client do |client|
+      to_remove.each do |image|
+        puts image
+        puts "REMOVE"
+
+        client.send("/queues/boxgrinder/image/destroy",
+                    :object => BoxGrinder::Task.new(
+                            :destroy,
+                            "Removing image with id = #{image.id}", {
+                                    :appliance_config   => YAML.load(image.appliance.config),
+                                    :platform           => image.platform,
+                                    :image_id           => image.id
+                            }),
+                    :properties => { :node => image.node }
+        )
+      end
+    end
 
     begin
       @image.destroy

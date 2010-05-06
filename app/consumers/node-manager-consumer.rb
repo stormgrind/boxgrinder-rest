@@ -24,35 +24,44 @@ module BoxGrinder
   module REST
     class NodeManagerConsumer
 
-      def on_object(payload, message)
+      def on_object( payload, message )
         @log = Rails.logger
-        @reply_to = message.jmsreply_to
 
-        if @reply_to.nil? or !payload.is_a?(Hash)
-          @log.error "Invalid data sent to register a node."
+        @log.info "Received new management message for Node artifact from node."
+        @log.trace payload.to_yaml
+
+        unless payload.is_a?(Hash) or payload[:node].nil? or message.jmsreply_to.nil?
+          @log.error "Invalid message received."
           return
         end
 
+        @reply_to = message.jmsreply_to
+
         case payload[:action]
           when :register
-            register_node(payload[:node])
+            register_node( payload[:node] )
+          when :unregister
+            unregister_node( payload[:name] )
         end
       end
 
-      def register_node(node_config)
-        @log.info "Registering new node..."
-        @log.debug "New node name: '#{node_config[:name]}'"
+      def register_node( node_config )
+        unless node_config.is_a?(Hash)
+          @log.error "Invalid node configuration received."
+          return
+        end
 
-        # TODO save this to database
-        # node_config[:address]
-        # node_config[:os_name]
-        # node_config[:os_version]
-        # node_config[:arch]
+        node = Node.new( node_config )
+
+        @log.info "Registering new node '#{node.name}'."
 
         begin
-          TorqueBox::Messaging::Client.connect do |client|
-            client.send(@reply_to, :text => 'OK')
+          ActiveRecord::Base.transaction do
+            node.save!
           end
+
+          reply_ok
+
           @log.info "New node registered."
         rescue => e
           @log.error e
@@ -60,6 +69,35 @@ module BoxGrinder
           @log.error "Couldn't register node '#{node_config[:name]}'."
         end
       end
+
+      def unregister_node( name )
+        @log.info "Unregistering node '#{name}'."
+
+        begin
+          node = Node.last( :conditions => { :name  => name } )
+
+          unless node.nil?
+            ActiveRecord::Base.transaction do
+              node.destroy
+            end
+          end
+
+          reply_ok
+        rescue => e
+          @log.error e
+          @log.error e.backtrace.join($/)
+          @log.error "Couldn't unregister node '#{name}'."
+        end
+
+        @log.info "Node '#{name}' unregistered."
+      end
+
+      def reply_ok
+        TorqueBox::Messaging::Client.connect do |client|
+          client.send(@reply_to, :text => 'OK')
+        end
+      end
+
     end
   end
 end

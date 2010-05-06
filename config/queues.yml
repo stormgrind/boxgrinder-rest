@@ -4,3 +4,4 @@
 /queues/boxgrinder/image/create:
 /queues/boxgrinder/image/convert:
 /queues/boxgrinder/image/deliver:
+/queues/boxgrinder/image/destroy:

@@ -45,7 +45,8 @@ module ApplicationHelper
   def entry_points
     [
             [ :appliances, appliances_url ],
-            [ :images, images_url ]
+            [ :images, images_url ],
+            [ :nodes, nodes_url ]
     ]
   end
 

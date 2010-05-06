@@ -21,21 +21,32 @@
 module BoxGrinder
   module REST
     class ImageManagerConsumer
-
-      def on_object( image )
+      def on_object(image)
         @log = Rails.logger
 
         @log.info "Received new management message for Image artifact from node."
+        @log.trace image.to_yaml
 
-        @image = Image.find( image[:id] )
-        @image.status = Image::STATUSES[image[:status]]
-        @image.node = image[:node] unless image[:node].nil? 
-        
-        ActiveRecord::Base.transaction do
-          @image.save!
+        unless image.is_a?(Hash) or image[:id].nil? or image[:status].nil?
+          @log.error "Invalid message received."
+          return
         end
 
-        @log.info "Message handled."
+        begin
+          @image = Image.find(image[:id])
+
+          @image.status = Image::STATUSES[image[:status]]
+          @image.node   = image[:node] unless image[:node].nil?
+
+          ActiveRecord::Base.transaction do
+            @image.save!
+          end
+
+          @log.info "Image #{image[:id]} status updated: #{image[:status]}."
+        rescue => e
+          @log.error e.info
+          @log.error "Couldn't update status update for image artifact. Image"
+        end
       end
     end
   end
