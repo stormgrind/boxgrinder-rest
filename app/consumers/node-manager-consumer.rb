@@ -51,11 +51,19 @@ module BoxGrinder
           return
         end
 
-        node = Node.new( node_config )
-
-        @log.info "Registering new node '#{node.name}'."
-
         begin
+          node = Node.last( :conditions => { :name  => node_config[:name] } )
+
+          unless node.nil?
+            reply_ok
+            @log.info "Node '#{node.name}' is already registered, skipping."
+            return
+          end
+
+          node = Node.new( node_config )
+
+          @log.info "Registering new node '#{node.name}'."
+
           ActiveRecord::Base.transaction do
             node.save!
           end
