@@ -52,6 +52,7 @@ class ImagesController < BaseController
               :appliance        => @image.appliance,
               :parent           => @image,
               :arch             => @image.arch,
+              :node             => @image.node,
               :platform         => platform,
               :description      => "Image for #{@image.appliance.name} appliance, #{platform} platform and #{@image.arch} architecture."
       )
@@ -65,9 +66,9 @@ class ImagesController < BaseController
                         :object => BoxGrinder::Task.new(
                                 :convert,
                                 image.description, {
-                                        :appliance_config   => YAML.load(@image.appliance.config),
-                                        :platform           => platform,
-                                        :image_id           => image.id
+                                        :name        => @image.appliance.name,
+                                        :platform    => platform,
+                                        :image_id    => image.id
                                 }),
                         :properties => { :node => @image.node.name }
             )
@@ -150,7 +151,7 @@ class ImagesController < BaseController
   end
 
   def destroy
-    unless [Image::STATUSES[:new], Image::STATUSES[:built], Image::STATUSES[:error]].include?(@image.status)
+    unless [Image::STATUSES[:new], Image::STATUSES[:built], Image::STATUSES[:converted], Image::STATUSES[:error]].include?(@image.status)
       render_error(Error.new("Current image status (#{@image.status}) doesn't allow to remove it. Try again later."))
       return
     end

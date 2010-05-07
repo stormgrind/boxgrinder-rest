@@ -6,4 +6,12 @@ class Error
 
   attr_accessor :message
   attr_accessor :exception
+
+  def info
+    if @error.exception.nil?
+      "#{@error.message}"
+    else
+      "#{@error.message}#$/#{@error.exception.backtrace.join($/)}"
+    end
+  end
 end

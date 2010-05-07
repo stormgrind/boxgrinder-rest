@@ -32,19 +32,27 @@ module BoxGrinder
           return
         end
 
-        #TODO: introduce actions
         begin
           @image = Image.find(image[:id])
+
+          unless Image::STATUSES.include?(image[:status])
+            @log.error "Unrecognized or no status sent: '#{image[:status]}', couldn't update image!"
+            return
+          end
+
           @image.status = Image::STATUSES[image[:status]]
 
-          node_name = image[:node]
+          if @image.status == Image::STATUSES[:building]
+            if image[:node].nil?
+              @log.error "No node specified, couldn't update image!"
+              return
+            end
 
-          unless node_name.nil?
-            node = Node.last( :conditions => { :name  => node_name } )
+            node = Node.last( :conditions => { :name  => image[:node] } )
 
             if node.nil?
-              @log.error "Node '#{node_name}' not found. Is node properly registered?"
-              @image.node = nil
+              @log.error "Node '#{image[:node]}' not found. Is node properly registered?"
+              return
             else
               @image.node = node
             end
