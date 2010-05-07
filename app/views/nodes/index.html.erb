@@ -6,6 +6,7 @@
         <th>ID</th>
         <th>Name</th>
         <th>Address</th>
+        <th>Status</th>
       </tr>
       <% @nodes.each do |node| %>
           <tr class="row">
@@ -13,6 +14,7 @@
               <%= link_to "#{node.id}", node %></td>
             <td><%= link_to "#{node.name}", node %> </td>
             <td><%= node.address %></td>
+            <td><%= node.status %></td>
           </tr>
       <% end %>
     </table>

@@ -55,14 +55,14 @@ module BoxGrinder
           node = Node.last( :conditions => { :name  => node_config[:name] } )
 
           unless node.nil?
-            reply_ok
-            @log.info "Node '#{node.name}' is already registered, skipping."
-            return
+            @log.info "Node '#{node.name}' is already registered, updating status."
+          else
+            node = Node.new( node_config )
           end
 
-          node = Node.new( node_config )
+          node.status = Node::STATUSES[:active]
 
-          @log.info "Registering new node '#{node.name}'."
+          @log.info "Registering node '#{node.name}'."
 
           ActiveRecord::Base.transaction do
             node.save!
@@ -70,7 +70,7 @@ module BoxGrinder
 
           reply_ok
 
-          @log.info "New node registered."
+          @log.info "Node registered."
         rescue => e
           @log.error e
           @log.error e.backtrace.join($/)
@@ -85,19 +85,21 @@ module BoxGrinder
           node = Node.last( :conditions => { :name  => name } )
 
           unless node.nil?
+            node.status = Node::STATUSES[:inactive]
+
             ActiveRecord::Base.transaction do
-              node.destroy
+              node.save!
             end
           end
 
           reply_ok
+
+          @log.info "Node '#{name}' unregistered."
         rescue => e
           @log.error e
           @log.error e.backtrace.join($/)
           @log.error "Couldn't unregister node '#{name}'."
         end
-
-        @log.info "Node '#{name}' unregistered."
       end
 
       def reply_ok

@@ -35,6 +35,7 @@ ActiveRecord::Schema.define(:version => 20100506161613) do
 
   create_table "nodes", :force => true do |t|
     t.string   "name",       :limit => 100, :null => false
+    t.string   "status",     :limit => 20,  :null => false
     t.string   "address",    :limit => 30,  :null => false
     t.string   "os_name",    :limit => 30,  :null => false
     t.string   "os_version", :limit => 20,  :null => false
