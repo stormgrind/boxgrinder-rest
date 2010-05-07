@@ -39,23 +39,9 @@ ActionController::Routing::Routes.draw do |map|
 
   map.resource :api, :controller => 'api', :only => [:show]
 
-  #map.connect 'tasks/status/:status.:format', :path_prefix => 'api', :controller => 'tasks', :action => 'index', :conditions => { :method => :get }, :requirements => { :id => /\d+/ }
-
   map.resources :appliances, :path_prefix => 'api', :except => [:edit, :new], :requirements => {:id => /\d+/}
   map.resources :images, :path_prefix => 'api', :member => {:deliver => :get, :convert => :post}, :except => [:update, :edit, :new], :requirements => {:id => /\d+/}
   map.resources :nodes, :path_prefix => 'api', :requirements => {:id => /\d+/}
-  #map.resources :packages, :path_prefix => 'api', :except => [:update, :edit, :new], :member => { :download => :get }, :requirements => { :id => /\d+/ }
-
-
-  #map.connect 'images/:id/package/:image_type/:archive_type.:format', :path_prefix => 'api', :controller => 'images', :action => 'package', :conditions => { :method => :post }, :requirements => { :id => /\d+/ }
-
-
-  #map.connect 'images/:action/:image_id', :controller => 'images'
-
-  #map.connect 'images/:id', :path_prefix => 'api', :controller => 'definitions', :action => 'show', :requirements => { :id => /\d/ }  
-
-  # requirements
-  #map.connect 'definitions/:id', :path_prefix => 'api', :controller => 'definitions', :action => 'show', :requirements => { :id => /\d/ }
 
   # Install the default routes as the lowest priority.
   # Note: These default routes make all actions in every controller accessible via GET requests. You should

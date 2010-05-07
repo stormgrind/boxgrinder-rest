@@ -43,13 +43,4 @@ ActiveRecord::Schema.define(:version => 20100506161613) do
     t.datetime "updated_at"
   end
 
-  create_table "packages", :force => true do |t|
-    t.integer  "image_id",                       :null => false
-    t.string   "description",    :limit => 1000, :null => false
-    t.string   "status",                         :null => false
-    t.string   "package_format", :limit => 50,   :null => false
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
 end
