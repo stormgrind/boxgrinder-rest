@@ -7,8 +7,8 @@
     </td>
   </tr>
   <tr class="row">
-    <td>Description</td>
-    <td><%= @image.description %>
+    <td>Summary</td>
+    <td><%= @image.summary %>
     </td>
   </tr>
   <% unless @image.parent.nil? %>
@@ -21,6 +21,16 @@
   <tr class="row">
     <td>Status</td>
     <td><%= @image.status %>
+    </td>
+  </tr>
+  <tr class="row">
+    <td>Previous status</td>
+    <td><%= @image.previous_status %>
+    </td>
+  </tr>
+  <tr class="row">
+    <td>Architecture</td>
+    <td><%= @image.arch %>
     </td>
   </tr>
   <% unless @image.node.nil? %>
@@ -57,20 +67,21 @@
 <% unless is_image_in_progress? %>
     <h4>Available actions</h4>
     <ul>
-      <% unless is_image_status?(:error) %>
-          <% if is_image_status?(:built) %>
-              <% if @image.platform.nil? %>
-                  <% BoxGrinder::RESTConfig.instance.plugins[:platform].each do |platform| %>
-                      <li><%= link_to "Convert to #{platform}", {:action => :convert, :controller => 'images', :id => @image.id, :platform => platform}, :method => :post %></li>
-                  <% end %>
-              <% end %>
-
-              <% BoxGrinder::RESTConfig.instance.plugins[:delivery].each do |delivery| %>
-                  <li><%= link_to "Deliver using #{delivery}", {:action => :deliver, :controller => 'images', :id => @image.id, :type => delivery}, :method => :post %></li>
+      <% if is_image_ready_to_convert? %>
+          <% if @image.platform.nil? %>
+              <% BoxGrinder::RESTConfig.instance.plugins[:platform].each do |platform| %>
+                  <li><%= link_to "Convert to #{platform}", {:action => :convert, :controller => 'images', :id => @image.id, :platform => platform}, :method => :post %></li>
               <% end %>
           <% end %>
       <% end %>
-      <% unless is_image_status?(:building) %>
+
+      <% if is_image_ready_to_deliver? %>
+          <% BoxGrinder::RESTConfig.instance.plugins[:delivery].each do |delivery| %>
+              <li><%= link_to "Deliver using #{delivery}", {:action => :deliver, :controller => 'images', :id => @image.id, :type => delivery}, :method => :post %></li>
+          <% end %>
+      <% end %>
+
+      <% if is_image_ready_to_destroy? %>
           <li><%= link_to "Destroy", {:action => :destroy, :id => @image.id}, :method => :delete, :confirm => "Are you sure? All dependent images will be removed too!" %> </li>
       <% end %>
     </ul>

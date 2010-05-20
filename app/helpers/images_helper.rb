@@ -11,13 +11,29 @@ module ImagesHelper
   # TO REVIEW
 
   def is_image_in_progress?
-    return true if @image.status.eql?( Image::STATUSES[:building] ) or @image.status.eql?( Image::STATUSES[:converting] ) or @image.status.eql?( Image::STATUSES[:packaging] )
+    return true if @image.status.eql?( Image::STATUSES[:building] ) or @image.status.eql?( Image::STATUSES[:converting] ) or @image.status.eql?( Image::STATUSES[:delivering] )
     false
   end
 
   def is_image_status?( status )
     return false if @image.status.nil?
     @image.status.eql?( Image::STATUSES[status] )
+  end
+
+  def is_image_ready_to_convert?
+    return true if is_image_status?( :built )
+    false
+  end
+
+  def is_image_ready_to_destroy?
+    return true unless is_image_in_progress?
+    false
+  end
+
+  def is_image_ready_to_deliver?
+    return false if is_image_in_progress?
+    return false if is_image_status?( :error ) and !@image.previous_status.eql?( Image::STATUSES[:delivering] )
+    true
   end
 
   def validate_image
@@ -38,7 +54,7 @@ module ImagesHelper
     end
 
     begin
-      @image = Image.find( id )
+      @image = Image.find( id, :include => [ :appliance, :node] )
       return true
     rescue ActiveRecord::RecordNotFound => e
       render_error(Error.new( "Image with id = #{id} not found.", e ))

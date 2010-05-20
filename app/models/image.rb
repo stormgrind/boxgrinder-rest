@@ -1,12 +1,11 @@
 class Image < ActiveRecord::Base
   ACTIONS = { :build => 'BUILD', :package => 'PACKAGE', :convert => 'CONVERT', :remove => 'REMOVE' }
-  STATUSES = { :new => 'NEW', :building => 'BUILDING', :converting => 'CONVERTING', :built => 'BUILT', :converted => 'CONVERTED', :removing => 'REMOVING', :error => 'ERROR' }
+  STATUSES = { :new => 'NEW', :building => 'BUILDING', :converting => 'CONVERTING', :built => 'BUILT', :converted => 'CONVERTED', :removing => 'REMOVING', :error => 'ERROR', :delivering => 'DELIVERING', :delivered => 'DELIVERED' }
   FORMATS = { :raw => 'RAW', :vmware => 'VMWARE', :ec2 => 'EC2' }
 
-  validates_presence_of :status, :description
+  validates_presence_of :status, :summary
   belongs_to :appliance
   belongs_to :node
-  has_one :package
   has_many :images, :foreign_key => "parent_id", :dependent => :destroy
   belongs_to :parent, :class_name => "Image"
 

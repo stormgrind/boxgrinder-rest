@@ -18,6 +18,8 @@
 # Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
+require 'models/image'
+
 module BoxGrinder
   module REST
     class ImageManagerConsumer
@@ -40,7 +42,8 @@ module BoxGrinder
             return
           end
 
-          @image.status = Image::STATUSES[image[:status]]
+          @image.previous_status  = @image.status
+          @image.status           = Image::STATUSES[image[:status]]
 
           if @image.status == Image::STATUSES[:building]
             if image[:node].nil?

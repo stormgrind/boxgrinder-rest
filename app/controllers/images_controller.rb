@@ -10,7 +10,7 @@ class ImagesController < BaseController
   before_filter :load_image, :except => [:create, :index]
 
   def index
-    @images = Image.all
+    @images = Image.all( :include => [ :appliance, :node ])
     render_general(@images)
   end
 
@@ -20,14 +20,38 @@ class ImagesController < BaseController
   end
 
   def deliver
-    param_delivery = params[:delivery] || nil
+    unless is_image_ready_to_deliver?
+      render_error(Error.new("Current image status (#{@image.status}) doesn't allow to deliver it. Try again later."))
+      return
+    end
 
-    puts @image
+    logger.info "Delivering image with id = #{@image.id}..."
+
+    param_type = params[:type] || nil
+
+    BoxGrinder::QueueHelper.new( :log => logger ).client do |client|
+      client.send("/queues/boxgrinder/image/deliver",
+                  :object => BoxGrinder::Task.new(
+                          :destroy,
+                          "Delivering #{@image.platform} image using #{param_type} delivery type", {
+                                  :name               => @image.appliance.name,
+                                  :image_id           => @image.id,
+                                  :platform           => @image.platform,
+                                  :type               => param_type
+                          }),
+                  :properties => { :node => @image.node.name }
+      )
+    end
 
     render_general(@image, 'images/show')
   end
 
   def convert
+    unless is_image_ready_to_convert?
+      render_error(Error.new("Current image status (#{@image.status}) doesn't allow to convert it. Try again later."))
+      return
+    end
+
     param_platform = params[:platform] || nil
 
     platform = nil
@@ -54,7 +78,7 @@ class ImagesController < BaseController
               :arch             => @image.arch,
               :node             => @image.node,
               :platform         => platform,
-              :description      => "Image for #{@image.appliance.name} appliance, #{platform} platform and #{@image.arch} architecture."
+              :summary          => "Image for #{@image.appliance.name} appliance, #{platform} platform and #{@image.arch} architecture."
       )
 
       begin
@@ -65,7 +89,7 @@ class ImagesController < BaseController
             client.send("/queues/boxgrinder/image/convert",
                         :object => BoxGrinder::Task.new(
                                 :convert,
-                                image.description, {
+                                image.summary, {
                                         :name        => @image.appliance.name,
                                         :platform    => platform,
                                         :image_id    => image.id
@@ -123,9 +147,9 @@ class ImagesController < BaseController
       end
 
       @image = Image.new(
-              :appliance_id     => appliance.id,
+              :appliance        => appliance,
               :arch             => param_arch,
-              :description      => "Base image for #{appliance.name} appliance and #{param_arch} architecture."
+              :summary          => "Base image for #{appliance.name} appliance and #{param_arch} architecture."
       )
 
       return unless object_saved?(@image)
@@ -134,7 +158,7 @@ class ImagesController < BaseController
         client.send("/queues/boxgrinder/image/create",
                     :object => BoxGrinder::Task.new(
                             :create,
-                            @image.description, {
+                            @image.summary, {
                                     :appliance_config   => appliance_config,
                                     :image_id           => @image.id
                             }),
@@ -151,7 +175,7 @@ class ImagesController < BaseController
   end
 
   def destroy
-    unless [Image::STATUSES[:new], Image::STATUSES[:built], Image::STATUSES[:converted], Image::STATUSES[:error]].include?(@image.status)
+        unless is_image_ready_to_destroy?
       render_error(Error.new("Current image status (#{@image.status}) doesn't allow to remove it. Try again later."))
       return
     end

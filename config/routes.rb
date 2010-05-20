@@ -39,8 +39,8 @@ ActionController::Routing::Routes.draw do |map|
 
   map.resource :api, :controller => 'api', :only => [:show]
 
-  map.resources :appliances, :path_prefix => 'api', :except => [:edit, :new], :requirements => {:id => /\d+/}
-  map.resources :images, :path_prefix => 'api', :member => {:deliver => :get, :convert => :post}, :except => [:update, :edit, :new], :requirements => {:id => /\d+/}
+  map.resources :appliances, :path_prefix => 'api', :except => [:update, :edit, :new], :requirements => {:id => /\d+/}
+  map.resources :images, :path_prefix => 'api', :member => {:deliver => :post, :convert => :post}, :except => [:update, :edit, :new], :requirements => {:id => /\d+/}
   map.resources :nodes, :path_prefix => 'api', :requirements => {:id => /\d+/}
 
   # Install the default routes as the lowest priority.

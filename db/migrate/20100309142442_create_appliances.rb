@@ -4,7 +4,6 @@ class CreateAppliances < ActiveRecord::Migration
       t.string :name, :limit => 100, :null => false
       t.string :status, :limit => 20, :null => false
       t.string :summary, :limit => 500, :null => false
-      #t.string :definition, :limit => 10000, :null => false
       t.string :config, :limit => 10000, :null => false
       t.timestamps
     end

@@ -4,19 +4,19 @@
     <table cellspacing="1" cellpadding="5">
       <tr class="header">
         <th>ID</th>
-        <th>Image description</th>
+        <th>Image summary</th>
         <th>Image status</th>
         <th>Appliance</th>
         <th>Node</th>
       </tr>
-      <% for image in @images %>
+      <% @images.each do |image| %>
           <tr class="row">
             <td>
               <%= link_to "#{image.id}", image %></td>
-            <td><%= link_to "#{image.description}", image %></td>
+            <td><%= link_to "#{image.summary}", image %></td>
             <td><%= image.status %></td>
             <td>
-              <% unless image.appliance.nil? %><%= link_to "#{image.appliance.name}", image.appliance %>
+              <% unless image.appliance.nil? %><%= link_to image.appliance.name, image.appliance %>
               <% end %></td>
             <td>
               <% unless image.node.nil? %><%= link_to "#{image.node.name}", image.node %>
